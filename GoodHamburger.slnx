@@ -1,1 +1,5 @@
-<Solution />
+<Solution>
+  <Folder Name="/Docs/" />
+  <Project Path="GoodHamburger.API/GoodHamburger.API.csproj" />
+  <Project Path="GoodHamburger.Shared/GoodHamburger.Shared.csproj" />
+</Solution>
