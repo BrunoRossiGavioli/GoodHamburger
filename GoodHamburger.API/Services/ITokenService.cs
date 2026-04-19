@@ -5,5 +5,5 @@ namespace GoodHamburger.API.Services;
 
 public interface ITokenService
 {
-    Task<TokenResponseDto> GerarTokenAsync(UsuarioEntity usuario);
+    Task<TokenResponseDto> GerarTokenAsync(UserEntity usuario);
 }

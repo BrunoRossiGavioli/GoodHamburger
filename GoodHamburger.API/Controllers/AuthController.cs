@@ -32,7 +32,7 @@ public class AuthController : ControllerBase
     {
         var usuario = await _usuarioRepository.ObterPorEmailAsync(dto.Email, cancellationToken);
 
-        if (usuario is null || !usuario.Ativo)
+        if (usuario is null || !usuario.IsActive)
             return Unauthorized(new ErrorResponse("Credenciais inválidas ou usuário inativo."));
 
         var senhaValida = await _usuarioRepository.VerificarSenhaAsync(usuario, dto.Senha);

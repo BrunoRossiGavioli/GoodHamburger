@@ -1,9 +1,9 @@
 namespace GoodHamburger.Shared.Models;
 
-public sealed record Usuario(
+public sealed record User(
     Guid Id,
-    string Nome,
+    string Name,
     string Email,
-    bool Ativo,
-    DateTime CriadoEm,
+    bool IsActive,
+    DateTime CreateAt,
     IEnumerable<string> Roles);

@@ -44,15 +44,15 @@ public class UsuarioService : IUsuarioService
     {
         ValidarRole(dto.Role);
 
-        var usuario = new UsuarioEntity
+        var usuario = new UserEntity
         {
             Id = Guid.NewGuid(),
-            Nome = dto.Nome,
+            Name = dto.Nome,
             Email = dto.Email,
             UserName = dto.Email,
             EmailConfirmed = true,
-            Ativo = true,
-            CriadoEm = DateTime.UtcNow
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
         };
 
         var createResult = await _usuarioRepository.CriarAsync(usuario, dto.Senha);
@@ -72,7 +72,7 @@ public class UsuarioService : IUsuarioService
             ?? throw new KeyNotFoundException($"Usuário {id} não encontrado.");
 
         if (!string.IsNullOrWhiteSpace(dto.Nome))
-            usuario.Nome = dto.Nome;
+            usuario.Name = dto.Nome;
 
         if (!string.IsNullOrWhiteSpace(dto.Email) && dto.Email != usuario.Email)
         {
@@ -113,16 +113,16 @@ public class UsuarioService : IUsuarioService
         var usuario = await _usuarioRepository.ObterPorIdAsync(id, cancellationToken)
             ?? throw new KeyNotFoundException($"Usuário {id} não encontrado.");
 
-        if (!usuario.Ativo)
+        if (!usuario.IsActive)
             throw new InvalidOperationException("Usuário já está inativo.");
 
-        usuario.Ativo = false;
+        usuario.IsActive = false;
         var updateResult = await _usuarioRepository.AtualizarAsync(usuario);
         if (!updateResult.Succeeded)
             throw new InvalidOperationException(FormatErrors(updateResult));
 
         var token = await _usuarioRepository.GerarTokenRedefinicaoSenhaAsync(usuario);
-        await _emailService.EnviarRedefinicaoSenhaAsync(usuario.Email!, usuario.Nome, token, cancellationToken);
+        await _emailService.EnviarRedefinicaoSenhaAsync(usuario.Email!, usuario.Name, token, cancellationToken);
     }
 
     public async Task RedefinirSenhaAsync(RedefinirSenhaDto dto, CancellationToken cancellationToken = default)
@@ -135,8 +135,8 @@ public class UsuarioService : IUsuarioService
             throw new InvalidOperationException(FormatErrors(result));
     }
 
-    private static UsuarioResponseDto MapToDto(UsuarioEntity usuario, IEnumerable<string> roles) =>
-        new(usuario.Id, usuario.Nome, usuario.Email!, usuario.Ativo, usuario.CriadoEm, roles);
+    private static UsuarioResponseDto MapToDto(UserEntity usuario, IEnumerable<string> roles) =>
+        new(usuario.Id, usuario.Name, usuario.Email!, usuario.IsActive, usuario.CreatedAt, roles);
 
     private static void ValidarRole(string role)
     {

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GoodHamburger.API.Data;
 
-public class AppDbContext : IdentityDbContext<UsuarioEntity, IdentityRole<Guid>, Guid>
+public class AppDbContext : IdentityDbContext<UserEntity, IdentityRole<Guid>, Guid>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -13,7 +13,11 @@ public class AppDbContext : IdentityDbContext<UsuarioEntity, IdentityRole<Guid>,
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<UsuarioEntity>(entity =>
+        builder.Entity<UserEntity>(entity =>
+        {
+            entity.Property(u => u.Name).HasMaxLength(100).IsRequired();
+            entity.Property(u => u.IsActive).HasDefaultValue(true);
+        });
         {
             entity.Property(u => u.Nome).HasMaxLength(100).IsRequired();
             entity.Property(u => u.Ativo).HasDefaultValue(true);

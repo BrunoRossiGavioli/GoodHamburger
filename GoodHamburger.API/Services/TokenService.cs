@@ -19,7 +19,7 @@ public class TokenService : ITokenService
         _usuarioRepository = usuarioRepository;
     }
 
-    public async Task<TokenResponseDto> GerarTokenAsync(UsuarioEntity usuario)
+    public async Task<TokenResponseDto> GerarTokenAsync(UserEntity usuario)
     {
         var roles = await _usuarioRepository.ObterRolesAsync(usuario);
 
@@ -27,7 +27,7 @@ public class TokenService : ITokenService
         {
             new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
             new(ClaimTypes.Email, usuario.Email!),
-            new(ClaimTypes.Name, usuario.Nome)
+            new(ClaimTypes.Name, usuario.Name)
         };
         claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
@@ -48,7 +48,7 @@ public class TokenService : ITokenService
         return new TokenResponseDto(
             new JwtSecurityTokenHandler().WriteToken(token),
             usuario.Email!,
-            usuario.Nome,
+            usuario.Name,
             roles,
             expiracao);
     }

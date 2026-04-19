@@ -4,7 +4,6 @@ using GoodHamburger.API.Data.Seeder;
 using GoodHamburger.API.Entities;
 using GoodHamburger.API.Repositories;
 using GoodHamburger.API.Services;
-using GoodHamburger.Shared.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -44,7 +43,7 @@ builder.Services.AddOpenApi(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<UsuarioEntity, IdentityRole<Guid>>(options =>
+builder.Services.AddIdentity<UserEntity, IdentityRole<Guid>>(options =>
 {
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
