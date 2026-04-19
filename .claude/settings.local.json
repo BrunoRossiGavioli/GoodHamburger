@@ -4,7 +4,8 @@
       "Bash(git *)",
       "Bash(dotnet restore *)",
       "Bash(export PATH=\"$PATH:/usr/share/dotnet:/usr/local/bin\")",
-      "Read(//usr/**)"
+      "Read(//usr/**)",
+      "WebFetch(domain:duendesoftware.com)"
     ]
   }
 }
