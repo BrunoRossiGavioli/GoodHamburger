@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(dotnet restore *)",
+      "Bash(export PATH=\"$PATH:/usr/share/dotnet:/usr/local/bin\")",
+      "Read(//usr/**)"
+    ]
+  }
+}
