@@ -1,4 +1,4 @@
-using GoodHamburger.API.Entities;
+using GoodHamburger.API.Entities.Auth;
 using GoodHamburger.Shared.Constants;
 using Microsoft.AspNetCore.Identity;
 

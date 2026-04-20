@@ -1,8 +1,7 @@
-using GoodHamburger.API.Entities;
+using GoodHamburger.API.Entities.Auth;
 using GoodHamburger.API.Entities.Customers;
 using GoodHamburger.API.Entities.Products;
 using GoodHamburger.API.Entities.PurchaseOrders;
-using GoodHamburger.API.Entities.PurshOrders;
 using GoodHamburger.Shared.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -13,6 +12,12 @@ namespace GoodHamburger.API.Data;
 
 public class AppDbContext : IdentityDbContext<UserEntity, IdentityRole<Guid>, Guid>
 {
+    public DbSet<CustomerEntity> Customers { get; set; }
+    public DbSet<ProductEntity> Products { get; set; }
+    public DbSet<ProductPriceEntity> ProductPrices { get; set; }
+    public DbSet<OrderEntity> Orders { get; set; }
+    public DbSet<OrderItemEntity> OrderItems { get; set; }
+
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder builder)
