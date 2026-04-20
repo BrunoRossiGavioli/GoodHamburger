@@ -1,7 +1,6 @@
 ﻿using GoodHamburger.API.Entities.Customers;
-using GoodHamburger.API.Entities.PurchaseOrders;
 
-namespace GoodHamburger.API.Entities.PurshOrders
+namespace GoodHamburger.API.Entities.PurchaseOrders
 {
     public class OrderEntity
     {
