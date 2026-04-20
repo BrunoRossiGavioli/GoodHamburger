@@ -1,9 +1,9 @@
-using GoodHamburger.API.Entities;
+using GoodHamburger.API.Entities.Auth;
 using Microsoft.AspNetCore.Identity;
 
-namespace GoodHamburger.API.Repositories;
+namespace GoodHamburger.API.Repositories.Auth;
 
-public interface IUsuarioRepository
+public interface IUserRepository
 {
     Task<UserEntity?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<UserEntity?> ObterPorEmailAsync(string email, CancellationToken cancellationToken = default);

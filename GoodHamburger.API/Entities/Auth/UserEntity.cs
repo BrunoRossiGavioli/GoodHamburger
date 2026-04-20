@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace GoodHamburger.API.Entities;
+namespace GoodHamburger.API.Entities.Auth;
 
 public class UserEntity : IdentityUser<Guid>
 {

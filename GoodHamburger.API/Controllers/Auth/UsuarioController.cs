@@ -1,26 +1,26 @@
-using GoodHamburger.API.Services;
+using GoodHamburger.API.Services.Auth;
 using GoodHamburger.Shared.Common;
 using GoodHamburger.Shared.Constants;
-using GoodHamburger.Shared.DTOs.Usuario;
+using GoodHamburger.Shared.DTOs.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GoodHamburger.API.Controllers;
+namespace GoodHamburger.API.Controllers.Auth;
 
 [ApiController]
 [Route("api/usuarios")]
 [Authorize(Roles = Roles.Administrador)]
 public class UsuarioController : ControllerBase
 {
-    private readonly IUsuarioService _usuarioService;
+    private readonly IUserService _usuarioService;
 
-    public UsuarioController(IUsuarioService usuarioService)
+    public UsuarioController(IUserService usuarioService)
     {
         _usuarioService = usuarioService;
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(IReadOnlyList<UsuarioResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IReadOnlyList<GetUserDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> ObterTodos(CancellationToken cancellationToken)
     {
         var usuarios = await _usuarioService.ObterTodosAsync(cancellationToken);
@@ -28,7 +28,7 @@ public class UsuarioController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(typeof(UsuarioResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetUserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ObterPorId(Guid id, CancellationToken cancellationToken)
     {
@@ -46,7 +46,7 @@ public class UsuarioController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(UsuarioResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Criar([FromBody] CriarUsuarioDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> Criar([FromBody] CreateUserDto dto, CancellationToken cancellationToken)
     {
         try
         {
@@ -60,10 +60,10 @@ public class UsuarioController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    [ProducesResponseType(typeof(UsuarioResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetUserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Alterar(Guid id, [FromBody] AlterarUsuarioDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> Alterar(Guid id, [FromBody] UpdateUserDto dto, CancellationToken cancellationToken)
     {
         try
         {
@@ -84,7 +84,7 @@ public class UsuarioController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> AlterarSenha(Guid id, [FromBody] AlterarSenhaAdminDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> AlterarSenha(Guid id, [FromBody] ChangePasswordAdminDto dto, CancellationToken cancellationToken)
     {
         try
         {

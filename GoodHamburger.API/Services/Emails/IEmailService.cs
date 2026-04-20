@@ -1,4 +1,4 @@
-namespace GoodHamburger.API.Services;
+namespace GoodHamburger.API.Services.Emails;
 
 public interface IEmailService
 {

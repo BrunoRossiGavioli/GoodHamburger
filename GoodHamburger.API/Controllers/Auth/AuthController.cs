@@ -1,26 +1,26 @@
-using GoodHamburger.API.Repositories;
-using GoodHamburger.API.Services;
+using GoodHamburger.API.Repositories.Auth;
+using GoodHamburger.API.Services.Auth;
 using GoodHamburger.Shared.Common;
 using GoodHamburger.Shared.DTOs.Auth;
 using GoodHamburger.Shared.DTOs.Usuario;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GoodHamburger.API.Controllers;
+namespace GoodHamburger.API.Controllers.Auth;
 
 [ApiController]
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
-    private readonly IUsuarioRepository _usuarioRepository;
+    private readonly IUserRepository _UserRepository;
     private readonly ITokenService _tokenService;
-    private readonly IUsuarioService _usuarioService;
+    private readonly IUserService _usuarioService;
 
     public AuthController(
-        IUsuarioRepository usuarioRepository,
+        IUserRepository UserRepository,
         ITokenService tokenService,
-        IUsuarioService usuarioService)
+        IUserService usuarioService)
     {
-        _usuarioRepository = usuarioRepository;
+        _UserRepository = UserRepository;
         _tokenService = tokenService;
         _usuarioService = usuarioService;
     }
@@ -30,12 +30,12 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginDto dto, CancellationToken cancellationToken)
     {
-        var usuario = await _usuarioRepository.ObterPorEmailAsync(dto.Email, cancellationToken);
+        var usuario = await _UserRepository.ObterPorEmailAsync(dto.Email, cancellationToken);
 
         if (usuario is null || !usuario.IsActive)
             return Unauthorized(new ErrorResponse("Credenciais inválidas ou usuário inativo."));
 
-        var senhaValida = await _usuarioRepository.VerificarSenhaAsync(usuario, dto.Senha);
+        var senhaValida = await _UserRepository.VerificarSenhaAsync(usuario, dto.Senha);
         if (!senhaValida)
             return Unauthorized(new ErrorResponse("Credenciais inválidas ou usuário inativo."));
 

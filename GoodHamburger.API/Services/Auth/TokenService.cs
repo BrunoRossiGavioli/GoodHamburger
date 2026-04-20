@@ -1,27 +1,27 @@
+using GoodHamburger.API.Entities.Auth;
+using GoodHamburger.API.Repositories.Auth;
+using GoodHamburger.Shared.DTOs.Auth;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using GoodHamburger.API.Entities;
-using GoodHamburger.API.Repositories;
-using GoodHamburger.Shared.DTOs.Auth;
-using Microsoft.IdentityModel.Tokens;
 
-namespace GoodHamburger.API.Services;
+namespace GoodHamburger.API.Services.Auth;
 
 public class TokenService : ITokenService
 {
     private readonly IConfiguration _configuration;
-    private readonly IUsuarioRepository _usuarioRepository;
+    private readonly IUserRepository _UserRepository;
 
-    public TokenService(IConfiguration configuration, IUsuarioRepository usuarioRepository)
+    public TokenService(IConfiguration configuration, IUserRepository UserRepository)
     {
         _configuration = configuration;
-        _usuarioRepository = usuarioRepository;
+        _UserRepository = UserRepository;
     }
 
     public async Task<TokenResponseDto> GerarTokenAsync(UserEntity usuario)
     {
-        var roles = await _usuarioRepository.ObterRolesAsync(usuario);
+        var roles = await _UserRepository.ObterRolesAsync(usuario);
 
         var claims = new List<Claim>
         {

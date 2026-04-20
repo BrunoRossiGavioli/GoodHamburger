@@ -1,4 +1,4 @@
-namespace GoodHamburger.Shared.Models;
+namespace GoodHamburger.Shared.Models.Users;
 
 public sealed record User(
     Guid Id,

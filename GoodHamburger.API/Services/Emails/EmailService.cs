@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Mail;
 
-namespace GoodHamburger.API.Services;
+namespace GoodHamburger.API.Services.Emails;
 
 public class EmailService : IEmailService
 {

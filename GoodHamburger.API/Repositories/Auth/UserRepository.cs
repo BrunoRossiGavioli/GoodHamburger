@@ -1,14 +1,14 @@
-using GoodHamburger.API.Entities;
+using GoodHamburger.API.Entities.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace GoodHamburger.API.Repositories;
+namespace GoodHamburger.API.Repositories.Auth;
 
-public class UsuarioRepository : IUsuarioRepository
+public class UserRepository : IUserRepository
 {
     private readonly UserManager<UserEntity> _userManager;
 
-    public UsuarioRepository(UserManager<UserEntity> userManager)
+    public UserRepository(UserManager<UserEntity> userManager)
     {
         _userManager = userManager;
     }
