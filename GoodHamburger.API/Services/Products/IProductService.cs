@@ -11,6 +11,6 @@ public interface IProductService
 
     Task<Product> CreateAsync(CreateProductDto dto);
     Task<Product> UpdateAsync(UpdateProductDto dto);
-    Task UpdateActiveState(UpdateActiveStateDto dto);
+    Task UpdateActiveState(UpdateProductActiveStateDto dto);
     Task DeleteAsync(UpdateProductDto dto);
 }

@@ -2,40 +2,41 @@ using GoodHamburger.API.Services.Auth;
 using GoodHamburger.Shared.Common;
 using GoodHamburger.Shared.Constants;
 using GoodHamburger.Shared.DTOs.Users;
+using GoodHamburger.Shared.Models.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GoodHamburger.API.Controllers.Auth;
 
 [ApiController]
-[Route("api/usuarios")]
+[Route("api/users")]
 [Authorize(Roles = Roles.Administrador)]
-public class UsuarioController : ControllerBase
+public class UserController : ControllerBase
 {
-    private readonly IUserService _usuarioService;
+    private readonly IUserService _userService;
 
-    public UsuarioController(IUserService usuarioService)
+    public UserController(IUserService userService)
     {
-        _usuarioService = usuarioService;
+        _userService = userService;
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(IReadOnlyList<GetUserDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IReadOnlyList<User>), StatusCodes.Status200OK)]
     public async Task<IActionResult> ObterTodos(CancellationToken cancellationToken)
     {
-        var usuarios = await _usuarioService.ObterTodosAsync(cancellationToken);
-        return Ok(usuarios);
+        var users = await _userService.GetAll(cancellationToken);
+        return Ok(users);
     }
 
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(typeof(GetUserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ObterPorId(Guid id, CancellationToken cancellationToken)
     {
         try
         {
-            var usuario = await _usuarioService.ObterPorIdAsync(id, cancellationToken);
-            return Ok(usuario);
+            var user = await _userService.GetAsync(id, cancellationToken);
+            return Ok(user);
         }
         catch (KeyNotFoundException ex)
         {
@@ -44,14 +45,14 @@ public class UsuarioController : ControllerBase
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(UsuarioResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(User), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Criar([FromBody] CreateUserDto dto, CancellationToken cancellationToken)
     {
         try
         {
-            var usuario = await _usuarioService.CriarAsync(dto, cancellationToken);
-            return CreatedAtAction(nameof(ObterPorId), new { id = usuario.Id }, usuario);
+            var user = await _userService.CreateAsync(dto, cancellationToken);
+            return CreatedAtAction(nameof(ObterPorId), new { id = user.Id }, user);
         }
         catch (Exception ex)
         {
@@ -59,16 +60,16 @@ public class UsuarioController : ControllerBase
         }
     }
 
-    [HttpPut("{id:guid}")]
-    [ProducesResponseType(typeof(GetUserDto), StatusCodes.Status200OK)]
+    [HttpPut]
+    [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Alterar(Guid id, [FromBody] UpdateUserDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> Alterar([FromBody] UpdateUserDto dto, CancellationToken cancellationToken)
     {
         try
         {
-            var usuario = await _usuarioService.AlterarAsync(id, dto, cancellationToken);
-            return Ok(usuario);
+            var user = await _userService.UpdateAsync(dto, cancellationToken);
+            return Ok(user);
         }
         catch (KeyNotFoundException ex)
         {
@@ -80,15 +81,15 @@ public class UsuarioController : ControllerBase
         }
     }
 
-    [HttpPost("{id:guid}/senha")]
+    [HttpPut("password")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> AlterarSenha(Guid id, [FromBody] ChangePasswordAdminDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> AlterarSenha([FromBody] ChangeUserPasswordDto dto, CancellationToken cancellationToken)
     {
         try
         {
-            await _usuarioService.AlterarSenhaAdminAsync(id, dto, cancellationToken);
+            await _userService.UpdatePasswordAsync(dto, cancellationToken);
             return NoContent();
         }
         catch (KeyNotFoundException ex)
@@ -101,15 +102,15 @@ public class UsuarioController : ControllerBase
         }
     }
 
-    [HttpPost("{id:guid}/inativar")]
+    [HttpPut("activeState")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Inativar(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Inativar(UpdateUserActiveStateDto dto, CancellationToken cancellationToken)
     {
         try
         {
-            await _usuarioService.InativarAsync(id, cancellationToken);
+            await _userService.UpdateActiveState(dto, cancellationToken);
             return NoContent();
         }
         catch (KeyNotFoundException ex)

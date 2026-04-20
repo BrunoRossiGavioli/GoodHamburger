@@ -13,42 +13,42 @@ public class UserRepository : IUserRepository
         _userManager = userManager;
     }
 
-    public Task<UserEntity?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default) =>
+    public Task<UserEntity?> GetAsync(Guid id, CancellationToken cancellationToken = default) =>
         _userManager.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
-    public Task<UserEntity?> ObterPorEmailAsync(string email, CancellationToken cancellationToken = default) =>
+    public Task<UserEntity?> GetByEmailAsync(string email, CancellationToken cancellationToken = default) =>
         _userManager.FindByEmailAsync(email);
 
-    public async Task<IReadOnlyList<UserEntity>> ObterTodosAsync(CancellationToken cancellationToken = default) =>
+    public async Task<IReadOnlyList<UserEntity>> GetAll(CancellationToken cancellationToken = default) =>
         await _userManager.Users.ToListAsync(cancellationToken);
 
-    public Task<IdentityResult> CriarAsync(UserEntity usuario, string senha) =>
-        _userManager.CreateAsync(usuario, senha);
+    public Task<IdentityResult> CreateAsync(UserEntity user, string password) =>
+        _userManager.CreateAsync(user, password);
 
-    public Task<IdentityResult> AtualizarAsync(UserEntity usuario) =>
-        _userManager.UpdateAsync(usuario);
+    public Task<IdentityResult> UpdateAsync(UserEntity user) =>
+        _userManager.UpdateAsync(user);
 
-    public Task<IdentityResult> AdicionarRoleAsync(UserEntity usuario, string role) =>
-        _userManager.AddToRoleAsync(usuario, role);
+    public Task<IdentityResult> AddRole(UserEntity user, string role) =>
+        _userManager.AddToRoleAsync(user, role);
 
-    public Task<IdentityResult> RemoverRoleAsync(UserEntity usuario, string role) =>
-        _userManager.RemoveFromRoleAsync(usuario, role);
+    public Task<IdentityResult> RemoveRole(UserEntity user, string role) =>
+        _userManager.RemoveFromRoleAsync(user, role);
 
-    public Task<IList<string>> ObterRolesAsync(UserEntity usuario) =>
-        _userManager.GetRolesAsync(usuario);
+    public Task<IList<string>> GetAllRoles(UserEntity user) =>
+        _userManager.GetRolesAsync(user);
 
-    public Task<bool> VerificarSenhaAsync(UserEntity usuario, string senha) =>
-        _userManager.CheckPasswordAsync(usuario, senha);
+    public Task<bool> VerifyPasswordAsync(UserEntity user, string password) =>
+        _userManager.CheckPasswordAsync(user, password);
 
-    public Task<string> GerarTokenRedefinicaoSenhaAsync(UserEntity usuario) =>
-        _userManager.GeneratePasswordResetTokenAsync(usuario);
+    public Task<string> GenerateTokenPasswordResetAsync(UserEntity user) =>
+        _userManager.GeneratePasswordResetTokenAsync(user);
 
-    public Task<IdentityResult> RedefinirSenhaAsync(UserEntity usuario, string token, string novaSenha) =>
-        _userManager.ResetPasswordAsync(usuario, token, novaSenha);
+    public Task<IdentityResult> ResetPasswordAsync(UserEntity user, string token, string novaSenha) =>
+        _userManager.ResetPasswordAsync(user, token, novaSenha);
 
-    public async Task<IdentityResult> AlterarSenhaAdminAsync(UserEntity usuario, string novaSenha)
+    public async Task<IdentityResult> UpdatePasswordAsync(UserEntity user, string novaSenha)
     {
-        var token = await _userManager.GeneratePasswordResetTokenAsync(usuario);
-        return await _userManager.ResetPasswordAsync(usuario, token, novaSenha);
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        return await _userManager.ResetPasswordAsync(user, token, novaSenha);
     }
 }

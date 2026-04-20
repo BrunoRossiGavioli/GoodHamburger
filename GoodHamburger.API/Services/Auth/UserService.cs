@@ -3,6 +3,7 @@ using GoodHamburger.API.Repositories.Auth;
 using GoodHamburger.API.Services.Emails;
 using GoodHamburger.Shared.Constants;
 using GoodHamburger.Shared.DTOs.Users;
+using GoodHamburger.Shared.Models.Users;
 using Microsoft.AspNetCore.Identity;
 
 namespace GoodHamburger.API.Services.Auth;
@@ -18,34 +19,34 @@ public class UserService : IUserService
         _emailService = emailService;
     }
 
-    public async Task<GetUserDto> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<User> GetAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var usuario = await _UserRepository.ObterPorIdAsync(id, cancellationToken)
+        var user = await _UserRepository.GetAsync(id, cancellationToken)
             ?? throw new KeyNotFoundException($"Usuário {id} não encontrado.");
 
-        var roles = await _UserRepository.ObterRolesAsync(usuario);
-        return MapToDto(usuario, roles);
+        var roles = await _UserRepository.GetAllRoles(user);
+        return MapToDto(user, roles);
     }
 
-    public async Task<IReadOnlyList<GetUserDto>> ObterTodosAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<User>> GetAll(CancellationToken cancellationToken = default)
     {
-        var usuarios = await _UserRepository.ObterTodosAsync(cancellationToken);
+        var users = await _UserRepository.GetAll(cancellationToken);
 
-        var result = new List<GetUserDto>(usuarios.Count);
-        foreach (var usuario in usuarios)
+        var result = new List<User>(users.Count);
+        foreach (var user in users)
         {
-            var roles = await _UserRepository.ObterRolesAsync(usuario);
-            result.Add(MapToDto(usuario, roles));
+            var roles = await _UserRepository.GetAllRoles(user);
+            result.Add(MapToDto(user, roles));
         }
 
         return result;
     }
 
-    public async Task<GetUserDto> CriarAsync(CreateUserDto dto, CancellationToken cancellationToken = default)
+    public async Task<User> CreateAsync(CreateUserDto dto, CancellationToken cancellationToken = default)
     {
         ValidarRole(dto.Role);
 
-        var usuario = new UserEntity
+        var user = new UserEntity
         {
             Id = Guid.NewGuid(),
             Name = dto.Name,
@@ -56,88 +57,88 @@ public class UserService : IUserService
             CreatedAt = DateTime.UtcNow
         };
 
-        var createResult = await _UserRepository.CriarAsync(usuario, dto.Password);
+        var createResult = await _UserRepository.CreateAsync(user, dto.Password);
         if (!createResult.Succeeded)
             throw new InvalidOperationException(FormatErrors(createResult));
 
-        var roleResult = await _UserRepository.AdicionarRoleAsync(usuario, dto.Role);
+        var roleResult = await _UserRepository.AddRole(user, dto.Role);
         if (!roleResult.Succeeded)
             throw new InvalidOperationException(FormatErrors(roleResult));
 
-        return MapToDto(usuario, [dto.Role]);
+        return MapToDto(user, [dto.Role]);
     }
 
-    public async Task<GetUserDto> AlterarAsync(Guid id, UpdateUserDto dto, CancellationToken cancellationToken = default)
+    public async Task<User> UpdateAsync(UpdateUserDto dto, CancellationToken cancellationToken = default)
     {
-        var usuario = await _UserRepository.ObterPorIdAsync(id, cancellationToken)
-            ?? throw new KeyNotFoundException($"Usuário {id} não encontrado.");
+        var user = await _UserRepository.GetAsync(dto.Id, cancellationToken)
+            ?? throw new KeyNotFoundException($"Usuário {dto.Id} não encontrado.");
 
         if (!string.IsNullOrWhiteSpace(dto.Name))
-            usuario.Name = dto.Name;
+            user.Name = dto.Name;
 
-        if (!string.IsNullOrWhiteSpace(dto.Email) && dto.Email != usuario.Email)
+        if (!string.IsNullOrWhiteSpace(dto.Email) && dto.Email != user.Email)
         {
-            usuario.Email = dto.Email;
-            usuario.UserName = dto.Email;
+            user.Email = dto.Email;
+            user.UserName = dto.Email;
         }
 
-        var updateResult = await _UserRepository.AtualizarAsync(usuario);
+        var updateResult = await _UserRepository.UpdateAsync(user);
         if (!updateResult.Succeeded)
             throw new InvalidOperationException(FormatErrors(updateResult));
 
         if (!string.IsNullOrWhiteSpace(dto.Role))
         {
             ValidarRole(dto.Role);
-            var rolesAtuais = await _UserRepository.ObterRolesAsync(usuario);
+            var rolesAtuais = await _UserRepository.GetAllRoles(user);
             foreach (var role in rolesAtuais)
-                await _UserRepository.RemoverRoleAsync(usuario, role);
+                await _UserRepository.RemoveRole(user, role);
 
-            await _UserRepository.AdicionarRoleAsync(usuario, dto.Role);
+            await _UserRepository.AddRole(user, dto.Role);
         }
 
-        var roles = await _UserRepository.ObterRolesAsync(usuario);
-        return MapToDto(usuario, roles);
+        var roles = await _UserRepository.GetAllRoles(user);
+        return MapToDto(user, roles);
     }
 
-    public async Task AlterarSenhaAdminAsync(Guid id, ChangePasswordAdminDto dto, CancellationToken cancellationToken = default)
+    public async Task UpdatePasswordAsync(ChangeUserPasswordDto dto, CancellationToken cancellationToken = default)
     {
-        var usuario = await _UserRepository.ObterPorIdAsync(id, cancellationToken)
-            ?? throw new KeyNotFoundException($"Usuário {id} não encontrado.");
+        var user = await _UserRepository.GetAsync(dto.Id, cancellationToken)
+            ?? throw new KeyNotFoundException($"Usuário {dto.Id} não encontrado.");
 
-        var result = await _UserRepository.AlterarSenhaAdminAsync(usuario, dto.NewPassword);
+        var result = await _UserRepository.UpdatePasswordAsync(user, dto.NewPassword);
         if (!result.Succeeded)
             throw new InvalidOperationException(FormatErrors(result));
     }
 
-    public async Task InativarAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task UpdateActiveState(UpdateUserActiveStateDto dto, CancellationToken cancellationToken = default)
     {
-        var usuario = await _UserRepository.ObterPorIdAsync(id, cancellationToken)
-            ?? throw new KeyNotFoundException($"Usuário {id} não encontrado.");
+        var user = await _UserRepository.GetAsync(dto.Id, cancellationToken)
+            ?? throw new KeyNotFoundException($"Usuário {dto.Id} não encontrado.");
 
-        if (!usuario.IsActive)
-            throw new InvalidOperationException("Usuário já está inativo.");
+        if (!user.IsActive && !dto.IsActive || user.IsActive && dto.IsActive)
+            return;
 
-        usuario.IsActive = false;
-        var updateResult = await _UserRepository.AtualizarAsync(usuario);
+        user.IsActive = false;
+        var updateResult = await _UserRepository.UpdateAsync(user);
         if (!updateResult.Succeeded)
             throw new InvalidOperationException(FormatErrors(updateResult));
 
-        var token = await _UserRepository.GerarTokenRedefinicaoSenhaAsync(usuario);
-        await _emailService.EnviarRedefinicaoSenhaAsync(usuario.Email!, usuario.Name, token, cancellationToken);
+        var token = await _UserRepository.GenerateTokenPasswordResetAsync(user);
+        await _emailService.EnviarRedefinicaoSenhaAsync(user.Email!, user.Name, token, cancellationToken);
     }
 
-    public async Task RedefinirSenhaAsync(ResetPasswordDto dto, CancellationToken cancellationToken = default)
+    public async Task ResetPasswordAsync(ResetUserPasswordDto dto, CancellationToken cancellationToken = default)
     {
-        var usuario = await _UserRepository.ObterPorEmailAsync(dto.Email, cancellationToken)
+        var user = await _UserRepository.GetByEmailAsync(dto.Email, cancellationToken)
             ?? throw new KeyNotFoundException("Usuário não encontrado.");
 
-        var result = await _UserRepository.RedefinirSenhaAsync(usuario, dto.Token, dto.NewPassword);
+        var result = await _UserRepository.ResetPasswordAsync(user, dto.Token, dto.NewPassword);
         if (!result.Succeeded)
             throw new InvalidOperationException(FormatErrors(result));
     }
 
-    private static GetUserDto MapToDto(UserEntity usuario, IEnumerable<string> roles) =>
-        new(usuario.Id, usuario.Name, usuario.Email!, usuario.IsActive, usuario.CreatedAt, roles);
+    private static User MapToDto(UserEntity user, IEnumerable<string> roles) =>
+        new(user.Id, user.Name, user.Email!, user.IsActive, user.CreatedAt, roles);
 
     private static void ValidarRole(string role)
     {

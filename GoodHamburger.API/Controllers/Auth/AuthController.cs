@@ -2,7 +2,8 @@ using GoodHamburger.API.Repositories.Auth;
 using GoodHamburger.API.Services.Auth;
 using GoodHamburger.Shared.Common;
 using GoodHamburger.Shared.DTOs.Auth;
-using GoodHamburger.Shared.DTOs.Usuario;
+using GoodHamburger.Shared.DTOs.Users;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GoodHamburger.API.Controllers.Auth;
@@ -13,16 +14,16 @@ public class AuthController : ControllerBase
 {
     private readonly IUserRepository _UserRepository;
     private readonly ITokenService _tokenService;
-    private readonly IUserService _usuarioService;
+    private readonly IUserService _userService;
 
     public AuthController(
         IUserRepository UserRepository,
         ITokenService tokenService,
-        IUserService usuarioService)
+        IUserService userService)
     {
         _UserRepository = UserRepository;
         _tokenService = tokenService;
-        _usuarioService = usuarioService;
+        _userService = userService;
     }
 
     [HttpPost("login")]
@@ -30,28 +31,28 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginDto dto, CancellationToken cancellationToken)
     {
-        var usuario = await _UserRepository.ObterPorEmailAsync(dto.Email, cancellationToken);
+        var user = await _UserRepository.GetByEmailAsync(dto.Email, cancellationToken);
 
-        if (usuario is null || !usuario.IsActive)
+        if (user is null || !user.IsActive)
             return Unauthorized(new ErrorResponse("Credenciais inválidas ou usuário inativo."));
 
-        var senhaValida = await _UserRepository.VerificarSenhaAsync(usuario, dto.Senha);
-        if (!senhaValida)
+        var isValidPassword = await _UserRepository.VerifyPasswordAsync(user, dto.Senha);
+        if (!isValidPassword)
             return Unauthorized(new ErrorResponse("Credenciais inválidas ou usuário inativo."));
 
-        var token = await _tokenService.GerarTokenAsync(usuario);
+        var token = await _tokenService.GerarTokenAsync(user);
         return Ok(token);
     }
 
-    [HttpPost("redefinir-senha")]
+    [HttpPost("reset-password")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> RedefinirSenha([FromBody] RedefinirSenhaDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> RedefinirSenha([FromBody] ResetUserPasswordDto dto, CancellationToken cancellationToken)
     {
         try
         {
-            await _usuarioService.RedefinirSenhaAsync(dto, cancellationToken);
+            await _userService.ResetPasswordAsync(dto, cancellationToken);
             return NoContent();
         }
         catch (KeyNotFoundException ex)

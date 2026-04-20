@@ -31,7 +31,7 @@ public class ProductService : IProductService
         throw new NotImplementedException();
     }
 
-    public Task UpdateActiveState(UpdateActiveStateDto dto)
+    public Task UpdateActiveState(UpdateProductActiveStateDto dto)
     {
         throw new NotImplementedException();
     }

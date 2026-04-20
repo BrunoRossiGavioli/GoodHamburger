@@ -20,12 +20,12 @@ public class EmailService : IEmailService
         var corpo = $@"
             Olá, {nome}!
 
-            Sua conta foi inativada. Use o token abaixo para redefinir sua senha:
+            Sua conta foi inativada. Use o token abaixo para redefinir sua password:
 
             Token: {token}
 
-            Endpoint: POST /api/auth/redefinir-senha
-            Body: {{ ""email"": ""{email}"", ""token"": ""<token>"", ""novaSenha"": ""<nova senha>"" }}";
+            Endpoint: POST /api/auth/redefinir-password
+            Body: {{ ""email"": ""{email}"", ""token"": ""<token>"", ""new password"": ""<new password>"" }}";
 
         var smtpHost = _configuration["Email:SmtpHost"];
         if (string.IsNullOrWhiteSpace(smtpHost))

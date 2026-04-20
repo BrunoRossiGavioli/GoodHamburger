@@ -11,5 +11,5 @@ public interface IOrderService
 
     Task<Order> CreateAsync(CreateOrderDto dto);
     Task<Order> UpdateAsync(UpdateOrderDto dto);
-    Task UpdateActiveState(UpdateActiveStateDto dto);
+    Task UpdateActiveState(UpdateOrderActiveStateDto dto);
 }

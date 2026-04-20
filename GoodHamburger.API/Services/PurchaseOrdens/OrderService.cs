@@ -26,7 +26,7 @@ public class OrderService : IOrderService
         throw new NotImplementedException();
     }
 
-    public Task UpdateActiveState(UpdateActiveStateDto dto)
+    public Task UpdateActiveState(UpdateOrderActiveStateDto dto)
     {
         throw new NotImplementedException();
     }
