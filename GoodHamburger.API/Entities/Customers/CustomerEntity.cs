@@ -1,4 +1,4 @@
-﻿using GoodHamburger.API.Entities.PurshOrders;
+﻿using GoodHamburger.API.Entities.PurchaseOrders;
 
 namespace GoodHamburger.API.Entities.Customers
 {
