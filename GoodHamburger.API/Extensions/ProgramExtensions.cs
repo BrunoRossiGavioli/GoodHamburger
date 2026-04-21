@@ -110,12 +110,6 @@ public static class ProgramExtensions
         return services;
     }
 
-    public static IServiceCollection AddUnitOfWorkers(this IServiceCollection services)
-    {
-        //TODO: Adicionar UnitOfWork
-        return services;
-    }
-
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddScoped<ITokenService, TokenService>();

@@ -9,7 +9,6 @@ builder.AddDbContext();
 builder.AddIdentityAndAuthentication();
 
 builder.Services.AddRepositories();
-builder.Services.AddUnitOfWorkers();
 builder.Services.AddServices();
 
 var app = builder.Build();
