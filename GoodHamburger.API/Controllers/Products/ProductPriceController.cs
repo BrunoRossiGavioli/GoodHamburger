@@ -19,18 +19,6 @@ public class ProductPriceController : ControllerBase
         _productPriceService = productPriceService;
     }
 
-    [HttpGet("{id:guid}")]
-    [ProducesResponseType(typeof(ProductPrice), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Get(Guid id)
-    {
-        var price = await _productPriceService.GetAsync(new GetProductPriceDto(id));
-        if (price is null)
-            return NotFound(new ErrorResponse($"ProductPrice {id} not found."));
-
-        return Ok(price);
-    }
-
     [HttpGet("search")]
     [ProducesResponseType(typeof(IEnumerable<ProductPrice>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Find([FromQuery] FindProductPriceDto dto)
@@ -41,14 +29,14 @@ public class ProductPriceController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = Roles.Administrador)]
-    [ProducesResponseType(typeof(ProductPrice), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProductPrice), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateProductPriceDto dto)
     {
         try
         {
             var price = await _productPriceService.CreateAsync(dto);
-            return CreatedAtAction(nameof(Get), new { id = price.Id }, price);
+            return Ok(price);
         }
         catch (Exception ex)
         {
@@ -65,7 +53,7 @@ public class ProductPriceController : ControllerBase
     {
         try
         {
-            await _productPriceService.DeleteAsync(new UpdateProductPriceDto(id, Guid.Empty, 0, DateTime.MinValue, null, string.Empty));
+            await _productPriceService.DeleteAsync(new(id));
             return NoContent();
         }
         catch (KeyNotFoundException ex)

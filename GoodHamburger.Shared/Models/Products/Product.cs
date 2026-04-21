@@ -6,5 +6,5 @@ public sealed record Product(
     Guid Id,
     string Name,
     string Description,
-    string Price,
+    decimal Price,
     ProductType Type);

@@ -1,0 +1,26 @@
+﻿using GoodHamburger.API.Entities.Customers;
+using GoodHamburger.API.Entities.Products;
+using GoodHamburger.API.Entities.PurchaseOrders;
+using GoodHamburger.API.Extensions.Entities;
+using GoodHamburger.API.Extensions.Entities.Products;
+using GoodHamburger.Shared.Extensions.Models;
+using GoodHamburger.Shared.Models.Customers;
+using GoodHamburger.Shared.Models.Products;
+using GoodHamburger.Shared.Models.PurchaseOrders;
+
+namespace GoodHamburger.API.Extensions.Entities
+{
+    public static class EntityToModelExtensions
+    {
+        public static Product MapEntityToModel(this ProductEntity entity, DateTime? dateRef = null)
+        {
+            return new Product(entity.Id, entity.Name, entity.Description, entity.GetCurrentPrice(dateRef).Value, entity.Type);
+        }
+
+        public static ProductPrice MapEntityToModel(this ProductPriceEntity entity)
+        {
+            return new ProductPrice(entity.Id, entity.ProductId, entity.Value, entity.StartDate, entity.EndDate, entity.Reason);
+        }
+        
+    }
+}
