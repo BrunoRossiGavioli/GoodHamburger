@@ -2,6 +2,7 @@ using GoodHamburger.API.Entities.Auth;
 using GoodHamburger.API.Entities.Customers;
 using GoodHamburger.API.Entities.Products;
 using GoodHamburger.API.Entities.PurchaseOrders;
+using GoodHamburger.API.Extensions.Data;
 using GoodHamburger.Shared.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -23,6 +24,7 @@ public class AppDbContext : IdentityDbContext<UserEntity, IdentityRole<Guid>, Gu
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.UseSqliteCaseInsensitiveCollation();
 
         builder.Entity<UserEntity>(entity =>
         {
