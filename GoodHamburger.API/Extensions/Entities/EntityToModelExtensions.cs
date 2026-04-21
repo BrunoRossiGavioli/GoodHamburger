@@ -26,6 +26,18 @@ namespace GoodHamburger.API.Extensions.Entities
         {
             return new ProductPrice(entity.Id, entity.ProductId, entity.Value, entity.StartDate, entity.EndDate, entity.Reason);
         }
-        
+
+        public static Order MapEntityToModel(this OrderEntity entity)
+        {
+            if (entity.CustomerId is null)
+                return new Order(entity.Id, entity.OrderDate, entity.Subtotal, entity.Discount, entity.Total, null, entity.CustomerName!, entity.CustomerPhone!, entity.CustomerAddress!, [.. entity.Items.Select(i => i.MapEntityToModel(entity.OrderDate))]);
+            else
+                return OrderExtension.FromCustomer(entity.Id, entity.OrderDate, entity.Subtotal, entity.Discount, entity.Total, entity.Customer!.MapEntityToModel(), [.. entity.Items.Select(i => i.MapEntityToModel(entity.OrderDate))]);
+        }
+
+        public static OrderItem MapEntityToModel(this OrderItemEntity entity, DateTime dateRef)
+        {
+            return new OrderItem(entity.Quantity, entity.UnitPrice, entity.Observation, entity.Product.MapEntityToModel(dateRef));
+        }
     }
 }
