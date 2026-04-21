@@ -12,6 +12,11 @@ namespace GoodHamburger.API.Extensions.Entities
 {
     public static class EntityToModelExtensions
     {
+        public static Customer MapEntityToModel(this CustomerEntity entity)
+        {
+            return new Customer(entity.Id, entity.Name, entity.Phone, entity.Address);
+        }
+
         public static Product MapEntityToModel(this ProductEntity entity, DateTime? dateRef = null)
         {
             return new Product(entity.Id, entity.Name, entity.Description, entity.GetCurrentPrice(dateRef).Value, entity.Type);
