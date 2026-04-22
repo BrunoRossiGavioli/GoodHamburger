@@ -40,7 +40,7 @@ public class OrderExtensionTests
         var customer = new Customer(Guid.NewGuid(), "Carlos", "11966666666", "Rua E");
         IReadOnlyCollection<OrderItem> items =
         [
-            new OrderItem(2, 5.00m, "Sem sal", null!)
+            new OrderItem(2, "Sem sal", null!)
         ];
 
         var order = OrderExtension.FromCustomer(Guid.NewGuid(), DateTime.UtcNow, 10m, 0m, 10m, customer, items);

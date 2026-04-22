@@ -76,7 +76,6 @@ public class OrderService : IOrderService
         var orderItems = dto.items
             .Select(i => new OrderItem(
                 i.Quantity,
-                i.UnitPrice,
                 i.Observation?.Trim() ?? string.Empty,
                 products.First(p => p.Id == i.ProductId).MapEntityToModel()))
             .ToList();
@@ -97,7 +96,6 @@ public class OrderService : IOrderService
             OrderId = orderEntity.Id,
             ProductId = i.ProductId,
             Quantity = i.Quantity,
-            UnitPrice = i.UnitPrice,
             Observation = i.Observation?.Trim() ?? string.Empty,
             Product = products.First(p => p.Id == i.ProductId)
         })];

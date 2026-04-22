@@ -157,7 +157,7 @@ public class OrderServiceTests
         var dto = new CreateOrderDto(
             CustomerId: customerId,
             CustomerName: null!, CustomerPhone: null!, CustomerAddress: null!,
-            items: [new CreateOrderItemDto(sandwich.Id, 1, sandwich.Prices.First().Value, "")]);
+            items: [new CreateOrderItemDto(sandwich.Id, 1, "")]);
 
         var result = await _sut.CreateAsync(dto);
 
@@ -174,7 +174,7 @@ public class OrderServiceTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
-                [new CreateOrderItemDto(Guid.NewGuid(), 1, 5.00m, "")])));
+                [new CreateOrderItemDto(Guid.NewGuid(), 1, "")])));
     }
 
     // ── CreateAsync — business rules (ThrowIfInvalidOrder) ────────────────────
@@ -187,7 +187,7 @@ public class OrderServiceTests
 
         await Assert.ThrowsAsync<OrderException>(() =>
             _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
-                [new CreateOrderItemDto(sandwich.Id, 2, 5.00m, "")])));
+                [new CreateOrderItemDto(sandwich.Id, 2, "")])));
     }
 
     [Fact]
@@ -200,8 +200,8 @@ public class OrderServiceTests
         await Assert.ThrowsAsync<OrderException>(() =>
             _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
             [
-                new CreateOrderItemDto(sandwich1.Id, 1, 5.00m, ""),
-                new CreateOrderItemDto(sandwich2.Id, 1, 7.00m, "")
+                new CreateOrderItemDto(sandwich1.Id, 1, ""),
+                new CreateOrderItemDto(sandwich2.Id, 1, "")
             ])));
     }
 
@@ -215,8 +215,8 @@ public class OrderServiceTests
         await Assert.ThrowsAsync<OrderException>(() =>
             _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
             [
-                new CreateOrderItemDto(drink1.Id, 1, 2.50m, ""),
-                new CreateOrderItemDto(drink2.Id, 1, 2.50m, "")
+                new CreateOrderItemDto(drink1.Id, 1, ""),
+                new CreateOrderItemDto(drink2.Id, 1, "")
             ])));
     }
 
@@ -232,9 +232,9 @@ public class OrderServiceTests
 
         var result = await _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
         [
-            new CreateOrderItemDto(sandwich.Id, 1, 5.00m, ""),
-            new CreateOrderItemDto(drink.Id,    1, 2.50m, ""),
-            new CreateOrderItemDto(fries.Id,    1, 2.00m, "")
+            new CreateOrderItemDto(sandwich.Id, 1, ""),
+            new CreateOrderItemDto(drink.Id,    1, ""),
+            new CreateOrderItemDto(fries.Id,    1, "")
         ]));
 
         Assert.Equal(9.50m, result.Subtotal);
@@ -251,8 +251,8 @@ public class OrderServiceTests
 
         var result = await _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
         [
-            new CreateOrderItemDto(sandwich.Id, 1, 5.00m, ""),
-            new CreateOrderItemDto(drink.Id,    1, 2.50m, "")
+            new CreateOrderItemDto(sandwich.Id, 1, ""),
+            new CreateOrderItemDto(drink.Id,    1, "")
         ]));
 
         Assert.Equal(7.50m, result.Subtotal);
@@ -269,8 +269,8 @@ public class OrderServiceTests
 
         var result = await _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
         [
-            new CreateOrderItemDto(sandwich.Id, 1, 5.00m, ""),
-            new CreateOrderItemDto(fries.Id,    1, 2.00m, "")
+            new CreateOrderItemDto(sandwich.Id, 1, ""),
+            new CreateOrderItemDto(fries.Id,    1, "")
         ]));
 
         Assert.Equal(7.00m, result.Subtotal);
@@ -285,7 +285,7 @@ public class OrderServiceTests
         SetupBasicMocks(products: [sandwich]);
 
         var result = await _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
-            [new CreateOrderItemDto(sandwich.Id, 1, 5.00m, "")]));
+            [new CreateOrderItemDto(sandwich.Id, 1, "")]));
 
         Assert.Equal(5.00m, result.Subtotal);
         Assert.Equal(0m, result.Discount);
@@ -299,7 +299,7 @@ public class OrderServiceTests
         SetupBasicMocks(products: [fries]);
 
         var result = await _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
-            [new CreateOrderItemDto(fries.Id, 1, 2.00m, "")]));
+            [new CreateOrderItemDto(fries.Id, 1, "")]));
 
         Assert.Equal(2.00m, result.Subtotal);
         Assert.Equal(0m, result.Discount);
@@ -316,7 +316,7 @@ public class OrderServiceTests
 
         var result = await _sut.CreateAsync(new CreateOrderDto(
             null, " João ", " 11999999999 ", " Rua A, 1 ",
-            [new CreateOrderItemDto(sandwich.Id, 1, 5.00m, "")]));
+            [new CreateOrderItemDto(sandwich.Id, 1, "")]));
 
         Assert.Null(result.CustomerId);
         Assert.Equal("João", result.CustomerName);
@@ -332,7 +332,7 @@ public class OrderServiceTests
         SetupBasicMocks(products: [sandwich]);
 
         var result = await _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
-            [new CreateOrderItemDto(sandwich.Id, 1, 5.00m, "")]));
+            [new CreateOrderItemDto(sandwich.Id, 1, "")]));
 
         Assert.True(result.OrderDate >= before);
     }
@@ -344,7 +344,7 @@ public class OrderServiceTests
         SetupBasicMocks(products: [sandwich]);
 
         var result = await _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
-            [new CreateOrderItemDto(sandwich.Id, 1, 5.00m, " sem cebola ")]));
+            [new CreateOrderItemDto(sandwich.Id, 1, " sem cebola ")]));
 
         Assert.Equal("sem cebola", result.Items.Single().Observation);
     }
@@ -479,8 +479,8 @@ public class OrderServiceTests
         await Assert.ThrowsAsync<OrderException>(() =>
             _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
             [
-                new CreateOrderItemDto(fries1.Id, 1, 2.00m, ""),
-                new CreateOrderItemDto(fries2.Id, 1, 2.00m, "")
+                new CreateOrderItemDto(fries1.Id, 1, ""),
+                new CreateOrderItemDto(fries2.Id, 1, "")
             ])));
     }
 
@@ -492,7 +492,7 @@ public class OrderServiceTests
 
         await Assert.ThrowsAsync<OrderException>(() =>
             _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
-                [new CreateOrderItemDto(fries.Id, 2, 2.00m, "")])));
+                [new CreateOrderItemDto(fries.Id, 2, "")])));
     }
 
     [Fact]
@@ -503,7 +503,7 @@ public class OrderServiceTests
 
         await Assert.ThrowsAsync<OrderException>(() =>
             _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
-                [new CreateOrderItemDto(drink.Id, 3, 2.50m, "")])));
+                [new CreateOrderItemDto(drink.Id, 3, "")])));
     }
 
     // ── Conteúdo dos itens retornados ─────────────────────────────────────────
@@ -560,9 +560,9 @@ public class OrderServiceTests
             CustomerId: customerId, CustomerName: null!, CustomerPhone: null!, CustomerAddress: null!,
             items:
             [
-                new CreateOrderItemDto(sandwich.Id, 1, 5.00m, ""),
-                new CreateOrderItemDto(fries.Id,    1, 2.00m, ""),
-                new CreateOrderItemDto(drink.Id,    1, 2.50m, "")
+                new CreateOrderItemDto(sandwich.Id, 1, ""),
+                new CreateOrderItemDto(fries.Id,    1, ""),
+                new CreateOrderItemDto(drink.Id,    1, "")
             ]));
 
         Assert.Equal(customerId, result.CustomerId);
@@ -638,5 +638,5 @@ public class OrderServiceTests
 
     private static CreateOrderDto AnonymousDto(params (Guid ProductId, int Qty, decimal Price)[] items) =>
         new(null, "João", "11999999999", "Rua A",
-            items.Select(i => new CreateOrderItemDto(i.ProductId, i.Qty, i.Price, "")).ToList());
+            items.Select(i => new CreateOrderItemDto(i.ProductId, i.Qty, "")).ToList());
 }

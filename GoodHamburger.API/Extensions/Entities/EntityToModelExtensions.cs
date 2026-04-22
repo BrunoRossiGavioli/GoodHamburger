@@ -37,7 +37,7 @@ namespace GoodHamburger.API.Extensions.Entities
 
         public static OrderItem MapEntityToModel(this OrderItemEntity entity, DateTime dateRef)
         {
-            return new OrderItem(entity.Quantity, entity.UnitPrice, entity.Observation, entity.Product.MapEntityToModel(dateRef));
+            return new OrderItem(entity.Quantity, entity.Observation, entity.Product.MapEntityToModel(dateRef));
         }
     }
 }

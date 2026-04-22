@@ -64,7 +64,7 @@ namespace GoodHamburger.Shared.Extensions.Models
 
         private static decimal CalculateItemTotal(OrderItem item)
         {
-            return item.UnitPrice * item.Quantity;
+            return item.Product.Price * item.Quantity;
         }
     }
 }

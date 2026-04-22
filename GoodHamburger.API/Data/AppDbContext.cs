@@ -158,10 +158,6 @@ public class AppDbContext : IdentityDbContext<UserEntity, IdentityRole<Guid>, Gu
                 .IsRequired()
                 .HasDefaultValue(1);
 
-            entity.Property(e => e.UnitPrice)
-                .IsRequired()
-                .HasPrecision(10, 2);
-
             entity.Property(e => e.Observation)
                 .HasMaxLength(200)
                 .IsRequired(false);

@@ -146,7 +146,6 @@ public class EntityToModelExtensionsTests
                 {
                     ProductId = productId,
                     Quantity = 1,
-                    UnitPrice = 2.00m,
                     Observation = "Sem sal",
                     Product = product,
                     Order = null!
@@ -159,7 +158,6 @@ public class EntityToModelExtensionsTests
         Assert.Single(model.Items);
         var item = model.Items.First();
         Assert.Equal(1, item.Quantity);
-        Assert.Equal(2.00m, item.UnitPrice);
         Assert.Equal("Sem sal", item.Observation);
         Assert.Equal("Batata Frita", item.Product.Name);
         Assert.Equal(2.00m, item.Product.Price);
