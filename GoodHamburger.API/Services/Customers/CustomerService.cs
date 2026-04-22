@@ -18,6 +18,9 @@ public class CustomerService : ICustomerService
 
     public async Task<IEnumerable<Customer>> FindAsync(FindCustomerDto dto)
     {
+        if(dto.Name is null && dto.Phone is null)
+            return await GetAllAsync();
+
         var entites = await _customerRepository.FindAsync(e => dto.Name != null && EF.Functions.Like(e.Name, $"%{dto.Name}") || dto.Phone != null && e.Phone == dto.Phone);
         return entites.Select(e => e.MapEntityToModel());
     }

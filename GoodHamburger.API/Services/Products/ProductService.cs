@@ -19,6 +19,9 @@ public class ProductService : IProductService
 
     public async Task<IEnumerable<Product>> FindAsync(FindProductDto dto)
     {
+        if(dto.Name is null)
+            return await GetAllAsync();
+
         var entities = await _productRepository.FindAsync(e => dto.Name != null && EF.Functions.Like(e.Name, $"%{dto.Name}%"));
         return entities.Select(p => p.MapEntityToModel());
     }

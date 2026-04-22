@@ -25,6 +25,9 @@ public class OrderService : IOrderService
 
     public async Task<IEnumerable<Order>> FindAsync(FindOrderDto dto)
     {
+        if(dto.CustomerId is null && dto.OrderDate is null)
+            return await GetAllAsync();
+
         var orders = await _orderRepository.FindAsync(e =>
             (dto.CustomerId == null || e.CustomerId == dto.CustomerId) &&
             (dto.OrderDate == null || e.OrderDate.Date == dto.OrderDate.Value.Date));
