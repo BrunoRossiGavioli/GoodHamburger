@@ -30,9 +30,9 @@ namespace GoodHamburger.API.Extensions.Entities
         public static Order MapEntityToModel(this OrderEntity entity)
         {
             if (entity.CustomerId is null)
-                return new Order(entity.Id, entity.OrderDate, entity.Subtotal, entity.Discount, entity.Total, null, entity.CustomerName!, entity.CustomerPhone!, entity.CustomerAddress!, [.. entity.Items.Select(i => i.MapEntityToModel(entity.OrderDate))]);
+                return new Order(entity.Id, entity.OrderDate, entity.Subtotal, entity.Discount, entity.Total, null, entity.CustomerName!, entity.CustomerPhone!, entity.CustomerAddress!, entity.Status, [.. entity.Items.Select(i => i.MapEntityToModel(entity.OrderDate))]);
             else
-                return OrderExtension.FromCustomer(entity.Id, entity.OrderDate, entity.Subtotal, entity.Discount, entity.Total, entity.Customer!.MapEntityToModel(), [.. entity.Items.Select(i => i.MapEntityToModel(entity.OrderDate))]);
+                return OrderExtension.FromCustomer(entity.Id, entity.OrderDate, entity.Subtotal, entity.Discount, entity.Total, entity.Customer!.MapEntityToModel(), entity.Status, [.. entity.Items.Select(i => i.MapEntityToModel(entity.OrderDate))]);
         }
 
         public static OrderItem MapEntityToModel(this OrderItemEntity entity, DateTime dateRef)

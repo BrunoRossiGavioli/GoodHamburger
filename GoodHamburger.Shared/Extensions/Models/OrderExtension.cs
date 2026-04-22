@@ -1,4 +1,5 @@
-﻿using GoodHamburger.Shared.Exceptions.BusinessRules;
+﻿using GoodHamburger.Shared.Enums;
+using GoodHamburger.Shared.Exceptions.BusinessRules;
 using GoodHamburger.Shared.Models.Customers;
 using GoodHamburger.Shared.Models.PurchaseOrders;
 using System.Numerics;
@@ -7,10 +8,10 @@ namespace GoodHamburger.Shared.Extensions.Models
 {
     public static class OrderExtension
     {
-        public static Order FromCustomer(Guid id, DateTime orderDate, decimal subtotal, decimal discount, decimal total, Customer customer, IReadOnlyCollection<OrderItem> items)
+        public static Order FromCustomer(Guid id, DateTime orderDate, decimal subtotal, decimal discount, decimal total, Customer customer, OrderStatus status, IReadOnlyCollection<OrderItem> items)
         {
             ArgumentNullException.ThrowIfNull(customer);
-            return new(id, orderDate, subtotal, discount, total, customer.Id, customer.Name, customer.Phone, customer.Address, items);
+            return new(id, orderDate, subtotal, discount, total, customer.Id, customer.Name, customer.Phone, customer.Address, status, items);
         }
 
         /// <summary>

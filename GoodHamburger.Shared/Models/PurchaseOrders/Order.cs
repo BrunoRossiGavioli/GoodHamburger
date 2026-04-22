@@ -1,3 +1,5 @@
+using GoodHamburger.Shared.Enums;
+
 namespace GoodHamburger.Shared.Models.PurchaseOrders;
 
 public sealed record Order(
@@ -10,5 +12,6 @@ public sealed record Order(
     string CustomerName,
     string CustomerPhone,
     string CustomerAddress,
+    OrderStatus Status,
     IReadOnlyCollection<OrderItem> Items
 );
