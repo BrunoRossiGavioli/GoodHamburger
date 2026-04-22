@@ -349,6 +349,228 @@ public class OrderServiceTests
         Assert.Equal("sem cebola", result.Items.Single().Observation);
     }
 
+    // ── Cardápio real: combos completos ───────────────────────────────────────
+    // Preços: X Burger R$5,00 | X Egg R$4,50 | X Bacon R$7,00
+    //         Batata Frita R$2,00 | Refrigerante R$2,50
+
+    [Fact]
+    public async Task CreateAsync_XBurgerComboCompleto_20PorCentoDesconto()
+    {
+        // 5,00 + 2,00 + 2,50 = 9,50 → desconto 1,90 → total 7,60
+        var sandwich = BuildProductEntity(ProductType.Sandwich, 5.00m, "X Burger");
+        var fries    = BuildProductEntity(ProductType.Fries,    2.00m, "Batata Frita");
+        var drink    = BuildProductEntity(ProductType.Drink,    2.50m, "Refrigerante");
+        SetupBasicMocks(products: [sandwich, fries, drink]);
+
+        var result = await _sut.CreateAsync(AnonymousDto(
+            (sandwich.Id, 1, 5.00m), (fries.Id, 1, 2.00m), (drink.Id, 1, 2.50m)));
+
+        Assert.Equal(9.50m, result.Subtotal);
+        Assert.Equal(1.90m, result.Discount);
+        Assert.Equal(7.60m, result.Total);
+    }
+
+    [Fact]
+    public async Task CreateAsync_XEggComboCompleto_20PorCentoDesconto()
+    {
+        // 4,50 + 2,00 + 2,50 = 9,00 → desconto 1,80 → total 7,20
+        var sandwich = BuildProductEntity(ProductType.Sandwich, 4.50m, "X Egg");
+        var fries    = BuildProductEntity(ProductType.Fries,    2.00m, "Batata Frita");
+        var drink    = BuildProductEntity(ProductType.Drink,    2.50m, "Refrigerante");
+        SetupBasicMocks(products: [sandwich, fries, drink]);
+
+        var result = await _sut.CreateAsync(AnonymousDto(
+            (sandwich.Id, 1, 4.50m), (fries.Id, 1, 2.00m), (drink.Id, 1, 2.50m)));
+
+        Assert.Equal(9.00m, result.Subtotal);
+        Assert.Equal(1.80m, result.Discount);
+        Assert.Equal(7.20m, result.Total);
+    }
+
+    [Fact]
+    public async Task CreateAsync_XBaconComboCompleto_20PorCentoDesconto()
+    {
+        // 7,00 + 2,00 + 2,50 = 11,50 → desconto 2,30 → total 9,20
+        var sandwich = BuildProductEntity(ProductType.Sandwich, 7.00m, "X Bacon");
+        var fries    = BuildProductEntity(ProductType.Fries,    2.00m, "Batata Frita");
+        var drink    = BuildProductEntity(ProductType.Drink,    2.50m, "Refrigerante");
+        SetupBasicMocks(products: [sandwich, fries, drink]);
+
+        var result = await _sut.CreateAsync(AnonymousDto(
+            (sandwich.Id, 1, 7.00m), (fries.Id, 1, 2.00m), (drink.Id, 1, 2.50m)));
+
+        Assert.Equal(11.50m, result.Subtotal);
+        Assert.Equal(2.30m, result.Discount);
+        Assert.Equal(9.20m, result.Total);
+    }
+
+    [Fact]
+    public async Task CreateAsync_XBaconMaisRefri_15PorCentoDesconto()
+    {
+        // 7,00 + 2,50 = 9,50 → desconto 1,425 → total 8,075
+        var sandwich = BuildProductEntity(ProductType.Sandwich, 7.00m, "X Bacon");
+        var drink    = BuildProductEntity(ProductType.Drink,    2.50m, "Refrigerante");
+        SetupBasicMocks(products: [sandwich, drink]);
+
+        var result = await _sut.CreateAsync(AnonymousDto(
+            (sandwich.Id, 1, 7.00m), (drink.Id, 1, 2.50m)));
+
+        Assert.Equal(9.50m, result.Subtotal);
+        Assert.Equal(1.425m, result.Discount);
+        Assert.Equal(8.075m, result.Total);
+    }
+
+    [Fact]
+    public async Task CreateAsync_XEggMaisBatata_10PorCentoDesconto()
+    {
+        // 4,50 + 2,00 = 6,50 → desconto 0,65 → total 5,85
+        var sandwich = BuildProductEntity(ProductType.Sandwich, 4.50m, "X Egg");
+        var fries    = BuildProductEntity(ProductType.Fries,    2.00m, "Batata Frita");
+        SetupBasicMocks(products: [sandwich, fries]);
+
+        var result = await _sut.CreateAsync(AnonymousDto(
+            (sandwich.Id, 1, 4.50m), (fries.Id, 1, 2.00m)));
+
+        Assert.Equal(6.50m, result.Subtotal);
+        Assert.Equal(0.65m, result.Discount);
+        Assert.Equal(5.85m, result.Total);
+    }
+
+    // ── Cardápio real: sem desconto ───────────────────────────────────────────
+
+    [Fact]
+    public async Task CreateAsync_BebidaOnly_SemDesconto()
+    {
+        var drink = BuildProductEntity(ProductType.Drink, 2.50m, "Refrigerante");
+        SetupBasicMocks(products: [drink]);
+
+        var result = await _sut.CreateAsync(AnonymousDto((drink.Id, 1, 2.50m)));
+
+        Assert.Equal(2.50m, result.Subtotal);
+        Assert.Equal(0m, result.Discount);
+        Assert.Equal(2.50m, result.Total);
+    }
+
+    [Fact]
+    public async Task CreateAsync_BebidaMaisBatata_SemSanduiche_SemDesconto()
+    {
+        // Desconto só existe quando há sanduíche no pedido
+        var drink = BuildProductEntity(ProductType.Drink, 2.50m, "Refrigerante");
+        var fries = BuildProductEntity(ProductType.Fries, 2.00m, "Batata Frita");
+        SetupBasicMocks(products: [drink, fries]);
+
+        var result = await _sut.CreateAsync(AnonymousDto(
+            (drink.Id, 1, 2.50m), (fries.Id, 1, 2.00m)));
+
+        Assert.Equal(4.50m, result.Subtotal);
+        Assert.Equal(0m, result.Discount);
+        Assert.Equal(4.50m, result.Total);
+    }
+
+    // ── Validações adicionais de duplicatas ───────────────────────────────────
+
+    [Fact]
+    public async Task CreateAsync_DuplicateFries_ThrowsOrderException()
+    {
+        var fries1 = BuildProductEntity(ProductType.Fries, 2.00m, "Batata Frita");
+        var fries2 = BuildProductEntity(ProductType.Fries, 2.00m, "Batata Frita");
+        SetupBasicMocks(products: [fries1, fries2]);
+
+        await Assert.ThrowsAsync<OrderException>(() =>
+            _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
+            [
+                new CreateOrderItemDto(fries1.Id, 1, 2.00m, ""),
+                new CreateOrderItemDto(fries2.Id, 1, 2.00m, "")
+            ])));
+    }
+
+    [Fact]
+    public async Task CreateAsync_QuantidadeMaiorQueUm_Batata_ThrowsOrderException()
+    {
+        var fries = BuildProductEntity(ProductType.Fries, 2.00m, "Batata Frita");
+        SetupBasicMocks(products: [fries]);
+
+        await Assert.ThrowsAsync<OrderException>(() =>
+            _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
+                [new CreateOrderItemDto(fries.Id, 2, 2.00m, "")])));
+    }
+
+    [Fact]
+    public async Task CreateAsync_QuantidadeMaiorQueUm_Bebida_ThrowsOrderException()
+    {
+        var drink = BuildProductEntity(ProductType.Drink, 2.50m, "Refrigerante");
+        SetupBasicMocks(products: [drink]);
+
+        await Assert.ThrowsAsync<OrderException>(() =>
+            _sut.CreateAsync(new CreateOrderDto(null, "João", "11999999999", "Rua A",
+                [new CreateOrderItemDto(drink.Id, 3, 2.50m, "")])));
+    }
+
+    // ── Conteúdo dos itens retornados ─────────────────────────────────────────
+
+    [Fact]
+    public async Task CreateAsync_ComboCompleto_RetornaItensComProdutosCorretos()
+    {
+        var sandwich = BuildProductEntity(ProductType.Sandwich, 5.00m, "X Burger");
+        var fries    = BuildProductEntity(ProductType.Fries,    2.00m, "Batata Frita");
+        var drink    = BuildProductEntity(ProductType.Drink,    2.50m, "Refrigerante");
+        SetupBasicMocks(products: [sandwich, fries, drink]);
+
+        var result = await _sut.CreateAsync(AnonymousDto(
+            (sandwich.Id, 1, 5.00m), (fries.Id, 1, 2.00m), (drink.Id, 1, 2.50m)));
+
+        Assert.Equal(3, result.Items.Count);
+        Assert.Contains(result.Items, i => i.Product.Type == ProductType.Sandwich && i.Product.Name == "X Burger");
+        Assert.Contains(result.Items, i => i.Product.Type == ProductType.Fries    && i.Product.Name == "Batata Frita");
+        Assert.Contains(result.Items, i => i.Product.Type == ProductType.Drink    && i.Product.Name == "Refrigerante");
+    }
+
+    [Fact]
+    public async Task CreateAsync_PedidoCriado_StatusInicial_EPendente()
+    {
+        // O status inicial de todo pedido deve ser Pendente
+        var sandwich = BuildProductEntity(ProductType.Sandwich, 5.00m);
+        OrderEntity? capturedEntity = null;
+        _productRepoMock.Setup(r => r.FindAsync(It.IsAny<Expression<Func<ProductEntity, bool>>>(), It.IsAny<CancellationToken>()))
+                        .ReturnsAsync([sandwich]);
+        _orderRepoMock.Setup(r => r.AddAsync(It.IsAny<OrderEntity>(), It.IsAny<CancellationToken>()))
+                      .Callback<OrderEntity, CancellationToken>((e, _) => capturedEntity = e)
+                      .ReturnsAsync((OrderEntity e, CancellationToken _) => e);
+        _orderRepoMock.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
+        await _sut.CreateAsync(AnonymousDto((sandwich.Id, 1, 5.00m)));
+
+        Assert.NotNull(capturedEntity);
+        Assert.Equal(OrderStatus.Pendente, capturedEntity!.Status);
+    }
+
+    // ── Cliente cadastrado recebe desconto ────────────────────────────────────
+
+    [Fact]
+    public async Task CreateAsync_ClienteCadastrado_ComboCompleto_Applies20Percent()
+    {
+        var customerId = Guid.NewGuid();
+        var customer   = BuildCustomerEntity(customerId);
+        var sandwich   = BuildProductEntity(ProductType.Sandwich, 5.00m, "X Burger");
+        var fries      = BuildProductEntity(ProductType.Fries,    2.00m, "Batata Frita");
+        var drink      = BuildProductEntity(ProductType.Drink,    2.50m, "Refrigerante");
+        SetupBasicMocks(customerEntity: customer, products: [sandwich, fries, drink]);
+
+        var result = await _sut.CreateAsync(new CreateOrderDto(
+            CustomerId: customerId, CustomerName: null!, CustomerPhone: null!, CustomerAddress: null!,
+            items:
+            [
+                new CreateOrderItemDto(sandwich.Id, 1, 5.00m, ""),
+                new CreateOrderItemDto(fries.Id,    1, 2.00m, ""),
+                new CreateOrderItemDto(drink.Id,    1, 2.50m, "")
+            ]));
+
+        Assert.Equal(customerId, result.CustomerId);
+        Assert.Equal(9.50m, result.Subtotal);
+        Assert.Equal(1.90m, result.Discount);
+        Assert.Equal(7.60m, result.Total);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private void SetupBasicMocks(CustomerEntity? customerEntity = null, List<ProductEntity>? products = null)
@@ -389,13 +611,13 @@ public class OrderServiceTests
         Orders = []
     };
 
-    private static ProductEntity BuildProductEntity(ProductType type, decimal price)
+    private static ProductEntity BuildProductEntity(ProductType type, decimal price, string? name = null)
     {
         var id = Guid.NewGuid();
         return new ProductEntity
         {
             Id = id,
-            Name = type.ToString(),
+            Name = name ?? type.ToString(),
             Description = "",
             Type = type,
             IsActive = true,
@@ -413,4 +635,8 @@ public class OrderServiceTests
             ]
         };
     }
+
+    private static CreateOrderDto AnonymousDto(params (Guid ProductId, int Qty, decimal Price)[] items) =>
+        new(null, "João", "11999999999", "Rua A",
+            items.Select(i => new CreateOrderItemDto(i.ProductId, i.Qty, i.Price, "")).ToList());
 }
