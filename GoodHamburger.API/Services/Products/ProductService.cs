@@ -4,6 +4,7 @@ using GoodHamburger.API.Repositories.Products;
 using GoodHamburger.Shared.DTOs.Products;
 using GoodHamburger.Shared.Models.Products;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata.Ecma335;
 
 namespace GoodHamburger.API.Services.Products;
 
@@ -18,9 +19,7 @@ public class ProductService : IProductService
 
     public async Task<IEnumerable<Product>> FindAsync(FindProductDto dto)
     {
-        var entities = await _productRepository.FindAsync(e =>
-            (dto.Name != null && EF.Functions.Like(e.Name, $"%{dto.Name}%")) ||
-            (dto.Type != null && e.Type.ToString() == dto.Type));
+        var entities = await _productRepository.FindAsync(e => dto.Name != null && EF.Functions.Like(e.Name, $"%{dto.Name}%"));
         return entities.Select(p => p.MapEntityToModel());
     }
 
@@ -32,20 +31,25 @@ public class ProductService : IProductService
     public async Task<Product?> GetAsync(GetProductDto dto)
     {
         var productEntity = await _productRepository.GetByIdAsync(dto.Id);
-        if (productEntity is null)
-            return null;
-
-        return productEntity.MapEntityToModel();
+        return productEntity?.MapEntityToModel();
     }
 
     public async Task<Product> CreateAsync(CreateProductDto dto)
     {
-        var productEntity = await _productRepository.AddAsync(new ProductEntity
+        var productEntity = await _productRepository.AddAsync(new()
         {
             Name = dto.Name.Trim(),
             Description = dto.Description.Trim(),
             Type = dto.Type,
         });
+
+        productEntity.Prices = [
+        new()
+        {
+            Reason = "Preço inicial",
+            Value = dto.Price,
+            StartDate = DateTime.UtcNow
+        }];
 
         await _productRepository.SaveChangesAsync();
         return productEntity.MapEntityToModel();
@@ -54,30 +58,33 @@ public class ProductService : IProductService
     public async Task<Product> UpdateAsync(UpdateProductDto dto)
     {
         var productEntity = await _productRepository.GetByIdAsync(dto.Id) ?? throw new InvalidOperationException("Product not found.");
+        productEntity.Name = dto.Name.Trim();
+        productEntity.Description = dto.Description.Trim();
 
-        await _productRepository.UpdateAsync(new ProductEntity
-        {
-            Id = dto.Id,
-            Name = dto.Name.Trim(),
-            Description = dto.Description.Trim(),
-            Type = productEntity.Type
-        });
         await _productRepository.SaveChangesAsync();
 
-        return await GetAsync(new GetProductDto(dto.Id)) ?? throw new InvalidOperationException("Failed to retrieve the updated product.");
+        return productEntity.MapEntityToModel();
     }
 
     public async Task UpdateActiveState(UpdateProductActiveStateDto dto)
     {
-        //TODO: UpdateProductActiveState
+        var productEntity = await _productRepository.GetByIdAsync(dto.Id) ?? throw new InvalidOperationException("Product not found.");
+
+        productEntity.IsActive = dto.IsActive;
+        await _productRepository.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(UpdateProductDto dto)
     {
-        var productEntity = await _productRepository.GetByIdAsync(dto.Id) ?? throw new InvalidOperationException("Product not found.");
-        //TODO: Lançar exceção caso o produto esteja associado a um pedido ativo
-
-        await _productRepository.DeleteAsync(productEntity);
-        await _productRepository.SaveChangesAsync();
+        try
+        {
+            var productEntity = await _productRepository.GetByIdAsync(dto.Id) ?? throw new InvalidOperationException("Product not found.");
+            await _productRepository.DeleteAsync(productEntity);
+            await _productRepository.SaveChangesAsync();
+        }
+        catch (InvalidOperationException)
+        {
+            throw new InvalidOperationException("Product can't be removed");
+        }
     }
 }
