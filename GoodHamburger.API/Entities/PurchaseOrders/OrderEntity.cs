@@ -1,4 +1,5 @@
 ﻿using GoodHamburger.API.Entities.Customers;
+using GoodHamburger.Shared.Enums;
 
 namespace GoodHamburger.API.Entities.PurchaseOrders
 {
@@ -14,6 +15,7 @@ namespace GoodHamburger.API.Entities.PurchaseOrders
         public decimal Subtotal { get; set; }
         public decimal Discount { get; set; }
         public decimal Total { get; set; }
+        public OrderStatus Status { get; set; }
 
         public CustomerEntity? Customer { get; set; }
         public ICollection<OrderItemEntity> Items { get; set; } = default!;

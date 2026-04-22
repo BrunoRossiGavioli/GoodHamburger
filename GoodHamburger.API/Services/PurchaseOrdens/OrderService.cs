@@ -35,67 +35,53 @@ public class OrderService : IOrderService
     public async Task<Order?> GetAsync(GetOrderDto dto)
     {
         var orderEntity = await _orderRepository.GetByIdAsync(dto.Id);
-        if (orderEntity is null)
-            return null;
-
-        return orderEntity.MapEntityToModel();
+        return orderEntity?.MapEntityToModel();
     }
 
     public async Task<Order> CreateAsync(CreateOrderDto dto)
     {
+        var orderEntity = new OrderEntity();
         if (dto.CustomerId.HasValue)
         {
             var customerExists = await _customerRepository.ExistsAsync(c => c.Id == dto.CustomerId.Value);
             if (!customerExists)
                 throw new InvalidOperationException("Customer not found.");
+
+            orderEntity.CustomerId = dto.CustomerId;
+        }
+        else
+        {
+            orderEntity.CustomerName = dto.CustomerName.Trim();
+            orderEntity.CustomerPhone = dto.CustomerPhone.Trim();
+            orderEntity.CustomerAddress = dto.CustomerAddress.Trim();
         }
 
-        var orderEntity = await _orderRepository.AddAsync(new OrderEntity
+        orderEntity.CustomerId = dto.CustomerId;
+        orderEntity.OrderDate = DateTime.UtcNow;
+        orderEntity.Subtotal = dto.Subtotal;
+        orderEntity.Discount = dto.Discount;
+        orderEntity.Total = dto.Total;
+
+        orderEntity.Items = [.. dto.items.Select(i => new OrderItemEntity
         {
-            CustomerId = dto.CustomerId,
-            OrderDate = DateTime.UtcNow,
-            CustomerName = dto.CustomerName.Trim(),
-            CustomerPhone = dto.CustomerPhone.Trim(),
-            CustomerAddress = dto.CustomerAddress.Trim(),
-            Subtotal = dto.Subtotal,
-            Discount = dto.Discount,
-            Total = dto.Total,
-        });
+            OrderId = orderEntity.Id,
+            ProductId = i.ProductId,
+            Quantity = i.Quantity,
+            UnitPrice = i.UnitPrice,
+            Observation = i.Observation.Trim()
+        })];
+
+        await _orderRepository.AddAsync(orderEntity);
+
         await _orderRepository.SaveChangesAsync();
         return orderEntity.MapEntityToModel();
     }
 
-    public async Task<Order> UpdateAsync(UpdateOrderDto dto)
+    public async Task UpdateStatus(UpdateOrderStatusDto dto)
     {
-        if (dto.CustomerId.HasValue)
-        {
-            var customerExists = await _customerRepository.ExistsAsync(c => c.Id == dto.CustomerId.Value);
-            if (!customerExists)
-                throw new InvalidOperationException("Customer not found.");
-        }
+        var orderEntity = await _orderRepository.GetByIdAsync(dto.Id) ?? throw new InvalidOperationException("Order not found.");
+        orderEntity.Status = dto.Status;
 
-        await _orderRepository.UpdateAsync(new OrderEntity
-        {
-            Id = dto.Id,
-            CustomerId = dto.CustomerId,
-            OrderDate = DateTime.UtcNow,
-            CustomerName = dto.CustomerName.Trim(),
-            CustomerPhone = dto.CustomerPhone.Trim(),
-            CustomerAddress = dto.CustomerAddress.Trim(),
-            Subtotal = dto.Subtotal,
-            Discount = dto.Discount,
-            Total = dto.Total,
-        });
         await _orderRepository.SaveChangesAsync();
-
-        return await GetAsync(new GetOrderDto(dto.Id)) ?? throw new InvalidOperationException("Failed to retrieve the updated order.");
     }
-
-    public async Task UpdateActiveState(UpdateOrderActiveStateDto dto)
-    {
-        //TODO: UpdateOrderActiveState
-        throw new NotImplementedException();
-    }
-
-
 }

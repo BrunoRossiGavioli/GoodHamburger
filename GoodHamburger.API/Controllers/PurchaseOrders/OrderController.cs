@@ -63,36 +63,15 @@ public class OrderController : ControllerBase
         }
     }
 
-    [HttpPut]
-    [ProducesResponseType(typeof(Order), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Update([FromBody] UpdateOrderDto dto)
-    {
-        try
-        {
-            var order = await _orderService.UpdateAsync(dto);
-            return Ok(order);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new ErrorResponse(ex.Message));
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new ErrorResponse(ex.Message));
-        }
-    }
-
-    [HttpPut("activeState")]
+    [HttpPut("status")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateActiveState([FromBody] UpdateOrderActiveStateDto dto)
+    public async Task<IActionResult> UpdateActiveState([FromBody] UpdateOrderStatusDto dto)
     {
         try
         {
-            await _orderService.UpdateActiveState(dto);
+            await _orderService.UpdateStatus(dto);
             return NoContent();
         }
         catch (KeyNotFoundException ex)

@@ -10,6 +10,5 @@ public interface IOrderService
     Task<IEnumerable<Order>> FindAsync(FindOrderDto dto);
 
     Task<Order> CreateAsync(CreateOrderDto dto);
-    Task<Order> UpdateAsync(UpdateOrderDto dto);
-    Task UpdateActiveState(UpdateOrderActiveStateDto dto);
+    Task UpdateStatus(UpdateOrderStatusDto dto);
 }
