@@ -1,19 +1,3 @@
-# TODO
-
-## API
-
-### Produtos
-
-- Criação do produto já cria um preço
-- 
-### Pedidos/Ordens
-
-- Criar um pedido já cria também uma pedidoItem
-- Criar em pedidos a propriedade/coluna de status (Pedido Realizado, Pedido em preparo, Pedido a caminho, Pedido entregue, Pedido Cancelado)
-	- Motivo do cancelamento (opcional, mas pode ser útil para análise de dados e melhoria do serviço)
-
----
-
 ## Testes Unitários
 
 - Criar testes unitários para validar as regras de negócio, como por exemplo:
