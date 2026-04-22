@@ -1,10 +1,11 @@
+## Atualizar Readme
+Agora que a API está pronta, vou atualizar o Readme com os motivos das decisões de arquitetura, tecnologias utilizadas, e como rodar o projeto.
+
+---
+
 ## Testes Unitários
 
-- Criar testes unitários para validar as regras de negócio, como por exemplo:
-  - Verificar se o preço do produto é atualizado corretamente quando um novo preço é criado
-  - Verificar se o pedido é criado corretamente com os itens e preços correspondentes
-  - Verificar se o total do pedido é calculado corretamente com base nos itens e preços
-  - Etc. (Ainda escrever, mas só para ter uma ideia para não esquecer depois) 
+- Criar testes unitário para alteração de status da ordem
 
 ---
 
