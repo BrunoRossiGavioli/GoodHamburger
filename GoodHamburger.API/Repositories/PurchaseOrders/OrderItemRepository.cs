@@ -1,5 +1,6 @@
 using GoodHamburger.API.Data;
 using GoodHamburger.API.Entities.PurchaseOrders;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace GoodHamburger.API.Repositories.PurchaseOrders
@@ -20,12 +21,12 @@ namespace GoodHamburger.API.Repositories.PurchaseOrders
 
         public async Task<IEnumerable<OrderItemEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await Task.FromResult(_context.OrderItems);
+            return await _context.OrderItems.Include(oi => oi.Order).Include(oi => oi.Product).ToListAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<OrderItemEntity>> FindAsync(Expression<Func<OrderItemEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            return await Task.FromResult(_context.OrderItems.Where(predicate));
+            return await _context.OrderItems.Where(predicate).Include(oi => oi.Order).Include(oi => oi.Product).ToListAsync(cancellationToken);
         }
 
         public async Task<OrderItemEntity> AddAsync(OrderItemEntity entity, CancellationToken cancellationToken = default)

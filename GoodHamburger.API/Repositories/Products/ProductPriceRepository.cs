@@ -1,5 +1,6 @@
 using GoodHamburger.API.Data;
 using GoodHamburger.API.Entities.Products;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace GoodHamburger.API.Repositories.Products
@@ -20,12 +21,12 @@ namespace GoodHamburger.API.Repositories.Products
 
         public async Task<IEnumerable<ProductPriceEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await Task.FromResult(_context.ProductPrices);
+            return await _context.ProductPrices.ToListAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<ProductPriceEntity>> FindAsync(Expression<Func<ProductPriceEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            return await Task.FromResult(_context.ProductPrices.Where(predicate));
+            return await _context.ProductPrices.Where(predicate).ToListAsync(cancellationToken);
         }
 
         public async Task<ProductPriceEntity> AddAsync(ProductPriceEntity entity, CancellationToken cancellationToken = default)
@@ -46,9 +47,9 @@ namespace GoodHamburger.API.Repositories.Products
             return Task.CompletedTask;
         }
 
-        public Task<bool> ExistsAsync(Expression<Func<ProductPriceEntity, bool>> predicate, CancellationToken cancellationToken = default)
+        public async Task<bool> ExistsAsync(Expression<Func<ProductPriceEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(_context.ProductPrices.Any(predicate));
+            return await _context.ProductPrices.AnyAsync(predicate, cancellationToken);
         }
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

@@ -1,5 +1,6 @@
 using GoodHamburger.API.Data;
 using GoodHamburger.API.Entities.PurchaseOrders;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace GoodHamburger.API.Repositories.PurchaseOrders
@@ -15,17 +16,17 @@ namespace GoodHamburger.API.Repositories.PurchaseOrders
 
         public async Task<OrderEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _context.Orders.FindAsync([id], cancellationToken);
+            return await _context.Orders.Where(o => o.Id == id).Include(o => o.Customer).Include(o => o.Items).FirstOrDefaultAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<OrderEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await Task.FromResult(_context.Orders);
+            return await _context.Orders.Include(o => o.Customer).Include(o => o.Items).ToListAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<OrderEntity>> FindAsync(Expression<Func<OrderEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            return await Task.FromResult(_context.Orders.Where(predicate));
+            return await _context.Orders.Where(predicate).Include(o => o.Customer).Include(o => o.Items).ToListAsync(cancellationToken);
         }
 
         public async Task<OrderEntity> AddAsync(OrderEntity entity, CancellationToken cancellationToken = default)
@@ -46,9 +47,9 @@ namespace GoodHamburger.API.Repositories.PurchaseOrders
             return Task.CompletedTask;
         }
 
-        public Task<bool> ExistsAsync(Expression<Func<OrderEntity, bool>> predicate, CancellationToken cancellationToken = default)
+        public async Task<bool> ExistsAsync(Expression<Func<OrderEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(_context.Orders.Any(predicate));
+            return await _context.Orders.AnyAsync(predicate, cancellationToken);
         }
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

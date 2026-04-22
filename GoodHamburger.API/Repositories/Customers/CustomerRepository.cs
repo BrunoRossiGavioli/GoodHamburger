@@ -1,5 +1,6 @@
 using GoodHamburger.API.Data;
 using GoodHamburger.API.Entities.Customers;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace GoodHamburger.API.Repositories.Customers
@@ -15,17 +16,17 @@ namespace GoodHamburger.API.Repositories.Customers
 
         public async Task<CustomerEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _context.Customers.FindAsync([id], cancellationToken);
+            return await _context.Customers.Where(c => c.Id == id).Include(c => c.Orders).FirstOrDefaultAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<CustomerEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await Task.FromResult(_context.Customers);
+            return await _context.Customers.Include(c => c.Orders).ToListAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<CustomerEntity>> FindAsync(Expression<Func<CustomerEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            return await Task.FromResult(_context.Customers.Where(predicate));
+            return await _context.Customers.Where(predicate).Include(c => c.Orders).ToListAsync();
         }
 
         public async Task<CustomerEntity> AddAsync(CustomerEntity entity, CancellationToken cancellationToken = default)
@@ -46,9 +47,9 @@ namespace GoodHamburger.API.Repositories.Customers
             return Task.CompletedTask;
         }
 
-        public Task<bool> ExistsAsync(Expression<Func<CustomerEntity, bool>> predicate, CancellationToken cancellationToken = default)
+        public async Task<bool> ExistsAsync(Expression<Func<CustomerEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(_context.Customers.Any(predicate));
+            return await _context.Customers.AnyAsync(predicate, cancellationToken);
         }
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
