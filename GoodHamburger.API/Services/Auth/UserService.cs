@@ -118,7 +118,7 @@ public class UserService : IUserService
         if (!user.IsActive && !dto.IsActive || user.IsActive && dto.IsActive)
             return;
 
-        user.IsActive = false;
+        user.IsActive = dto.IsActive;
         var updateResult = await _UserRepository.UpdateAsync(user);
         if (!updateResult.Succeeded)
             throw new InvalidOperationException(FormatErrors(updateResult));
