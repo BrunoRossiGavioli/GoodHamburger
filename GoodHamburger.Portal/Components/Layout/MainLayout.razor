@@ -42,8 +42,17 @@
 </div>
 
 @code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        // Inicializa o BroadcastChannel listener para esta aba.
+        // Executado apenas no cliente (após circuito ativo), nunca durante prerender/SSR.
+        await AuthStateProvider.InitializeBroadcastAsync();
+    }
+
     private async Task LogoutAsync()
     {
+        // NotifyLogoutAsync faz o broadcast para outras abas internamente.
         await AuthStateProvider.NotifyLogoutAsync();
         NavigationManager.NavigateTo("/login", forceLoad: true);
     }

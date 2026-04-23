@@ -1,22 +1,24 @@
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using System.Text.Json;
 
 namespace GoodHamburger.Portal.Services;
 
+// Usa ProtectedLocalStorage (compartilhado entre abas do mesmo domínio)
+// em vez de ProtectedSessionStorage (isolado por aba/circuito).
+// Os dados são criptografados pela Data Protection API do ASP.NET Core.
 public class ProtectedSessionStorageService : ILocalStorageService
 {
-    private readonly ProtectedSessionStorage _sessionStorage;
+    private readonly ProtectedLocalStorage _localStorage;
 
-    public ProtectedSessionStorageService(ProtectedSessionStorage sessionStorage)
+    public ProtectedSessionStorageService(ProtectedLocalStorage localStorage)
     {
-        _sessionStorage = sessionStorage;
+        _localStorage = localStorage;
     }
 
     public async Task SetItemAsync<T>(string key, T value)
     {
         try
         {
-            await _sessionStorage.SetAsync(key, value);
+            await _localStorage.SetAsync(key, value);
         }
         catch (Exception ex)
         {
@@ -28,7 +30,7 @@ public class ProtectedSessionStorageService : ILocalStorageService
     {
         try
         {
-            var result = await _sessionStorage.GetAsync<T>(key);
+            var result = await _localStorage.GetAsync<T>(key);
             return result.Success ? result.Value : default;
         }
         catch
@@ -41,7 +43,7 @@ public class ProtectedSessionStorageService : ILocalStorageService
     {
         try
         {
-            await _sessionStorage.DeleteAsync(key);
+            await _localStorage.DeleteAsync(key);
         }
         catch { }
     }
@@ -50,8 +52,8 @@ public class ProtectedSessionStorageService : ILocalStorageService
     {
         try
         {
-            await _sessionStorage.DeleteAsync("access_token");
-            await _sessionStorage.DeleteAsync("refresh_token");
+            await _localStorage.DeleteAsync("access_token");
+            await _localStorage.DeleteAsync("refresh_token");
         }
         catch { }
     }

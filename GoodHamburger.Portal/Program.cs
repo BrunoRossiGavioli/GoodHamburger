@@ -13,7 +13,10 @@ builder.Services.AddRazorComponents()
 builder.Services.AddMudServices();
 
 // Add authentication and authorization
-builder.Services.AddScoped<ProtectedSessionStorage>();
+// ProtectedLocalStorage: compartilhado entre abas do mesmo domínio (origin),
+// criptografado pela Data Protection API. Substitui o ProtectedSessionStorage
+// que era isolado por aba/circuito.
+builder.Services.AddScoped<ProtectedLocalStorage>();
 builder.Services.AddScoped<ILocalStorageService, ProtectedSessionStorageService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<CustomAuthStateProvider>();

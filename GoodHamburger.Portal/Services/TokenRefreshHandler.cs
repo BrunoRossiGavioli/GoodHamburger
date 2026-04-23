@@ -5,14 +5,14 @@ using System.Net.Http.Headers;
 
 public class TokenRefreshHandler : DelegatingHandler
 {
-    private readonly ProtectedSessionStorage _sessionStorage;
+    private readonly ProtectedLocalStorage _localStorage;
     private readonly IHttpClientFactory _clientFactory;
 
     public TokenRefreshHandler(
-        ProtectedSessionStorage sessionStorage,
+        ProtectedLocalStorage localStorage,  // ProtectedLocalStorage: compartilhado entre abas
         IHttpClientFactory clientFactory)
     {
-        _sessionStorage = sessionStorage;
+        _localStorage = localStorage;
         _clientFactory = clientFactory;
     }
 
@@ -55,7 +55,7 @@ public class TokenRefreshHandler : DelegatingHandler
         if (refreshResponse.IsSuccessStatusCode)
         {
             var tokenResponse = await refreshResponse.Content.ReadFromJsonAsync<TokenResponseDto>(cancellationToken: ct);
-            if(tokenResponse is null)
+            if (tokenResponse is null)
                 return false;
 
             await TrySetItemAsync("access_token", tokenResponse.Token);
@@ -67,15 +67,15 @@ public class TokenRefreshHandler : DelegatingHandler
     }
 
     /// <summary>
-    /// Leitura do ProtectedSessionStorage resiliente: durante prerender/SSR o JS interop
-    /// não está disponível e lança InvalidOperationException. Nesse caso, retornamos null
-    /// e a requisição prossegue sem Authorization header (será refeita quando o circuito subir).
+    /// Leitura resiliente: durante prerender/SSR o JS interop não está disponível e lança
+    /// InvalidOperationException. Nesse caso retornamos null e a requisição prossegue sem
+    /// Authorization header (será refeita quando o circuito subir).
     /// </summary>
     private async Task<string?> TryGetItemAsync(string key)
     {
         try
         {
-            var result = await _sessionStorage.GetAsync<string>(key);
+            var result = await _localStorage.GetAsync<string>(key);
             return result.Success ? result.Value : null;
         }
         catch (InvalidOperationException)
@@ -88,7 +88,7 @@ public class TokenRefreshHandler : DelegatingHandler
     {
         try
         {
-            await _sessionStorage.SetAsync(key, value);
+            await _localStorage.SetAsync(key, value);
         }
         catch (InvalidOperationException)
         {
