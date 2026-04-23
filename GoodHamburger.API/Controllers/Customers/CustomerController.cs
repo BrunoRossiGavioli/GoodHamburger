@@ -10,6 +10,7 @@ namespace GoodHamburger.API.Controllers.Customers;
 [ApiController]
 [Route("api/customers")]
 [Authorize]
+[Tags("Customers")]
 public class CustomerController : ControllerBase
 {
     private readonly ICustomerService _customerService;
@@ -21,6 +22,7 @@ public class CustomerController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<Customer>), StatusCodes.Status200OK)]
+    [EndpointSummary("Get all customers")]
     public async Task<IActionResult> GetAll()
     {
         var customers = await _customerService.GetAllAsync();
@@ -30,6 +32,7 @@ public class CustomerController : ControllerBase
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(Customer), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Get a customer by ID")]
     public async Task<IActionResult> Get(Guid id)
     {
         var customer = await _customerService.GetAsync(new GetCustomerDto(id));
@@ -41,6 +44,7 @@ public class CustomerController : ControllerBase
 
     [HttpGet("search")]
     [ProducesResponseType(typeof(IEnumerable<Customer>), StatusCodes.Status200OK)]
+    [EndpointSummary("Find customers by name or phone")]
     public async Task<IActionResult> Find([FromQuery] FindCustomerDto dto)
     {
         var customers = await _customerService.FindAsync(dto);
@@ -50,6 +54,7 @@ public class CustomerController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(Customer), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Create a new customer")]
     public async Task<IActionResult> Create([FromBody] CreateCustomerDto dto)
     {
         try
@@ -67,6 +72,7 @@ public class CustomerController : ControllerBase
     [ProducesResponseType(typeof(Customer), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Update an existing customer")]
     public async Task<IActionResult> Update([FromBody] UpdateCustomerDto dto)
     {
         try
@@ -88,6 +94,7 @@ public class CustomerController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Delete a customer by ID")]
     public async Task<IActionResult> Delete(Guid id)
     {
         try

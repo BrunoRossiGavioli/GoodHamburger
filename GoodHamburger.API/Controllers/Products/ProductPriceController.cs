@@ -10,6 +10,7 @@ namespace GoodHamburger.API.Controllers.Products;
 
 [ApiController]
 [Route("api/product-prices")]
+[Tags("Products")]
 public class ProductPriceController : ControllerBase
 {
     private readonly IProductPriceService _productPriceService;
@@ -21,6 +22,7 @@ public class ProductPriceController : ControllerBase
 
     [HttpGet("search")]
     [ProducesResponseType(typeof(IEnumerable<ProductPrice>), StatusCodes.Status200OK)]
+    [EndpointSummary("Search prices")]
     public async Task<IActionResult> Find([FromQuery] FindProductPriceDto dto)
     {
         var prices = await _productPriceService.FindAsync(dto);
@@ -31,6 +33,7 @@ public class ProductPriceController : ControllerBase
     [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(typeof(ProductPrice), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Add product price")]
     public async Task<IActionResult> Create([FromBody] CreateProductPriceDto dto)
     {
         try
@@ -49,6 +52,7 @@ public class ProductPriceController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Delete product price")]
     public async Task<IActionResult> Delete(Guid id)
     {
         try

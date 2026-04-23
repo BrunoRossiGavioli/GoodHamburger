@@ -10,6 +10,7 @@ namespace GoodHamburger.API.Controllers.Products;
 
 [ApiController]
 [Route("api/products")]
+[Tags("Products")]
 public class ProductController : ControllerBase
 {
     private readonly IProductService _productService;
@@ -21,6 +22,7 @@ public class ProductController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<Product>), StatusCodes.Status200OK)]
+    [EndpointSummary("Get all products")]
     public async Task<IActionResult> GetAll()
     {
         var products = await _productService.GetAllAsync();
@@ -30,6 +32,7 @@ public class ProductController : ControllerBase
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Get product by ID")]
     public async Task<IActionResult> Get(Guid id)
     {
         var product = await _productService.GetAsync(new GetProductDto(id));
@@ -41,6 +44,7 @@ public class ProductController : ControllerBase
 
     [HttpGet("search")]
     [ProducesResponseType(typeof(IEnumerable<Product>), StatusCodes.Status200OK)]
+    [EndpointSummary("Search products")]
     public async Task<IActionResult> Find([FromQuery] FindProductDto dto)
     {
         var products = await _productService.FindAsync(dto);
@@ -51,6 +55,7 @@ public class ProductController : ControllerBase
     [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(typeof(Product), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Create a new product")]
     public async Task<IActionResult> Create([FromBody] CreateProductDto dto)
     {
         try
@@ -69,6 +74,7 @@ public class ProductController : ControllerBase
     [ProducesResponseType(typeof(Product), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Update an existing product")]
     public async Task<IActionResult> Update([FromBody] UpdateProductDto dto)
     {
         try
@@ -91,6 +97,7 @@ public class ProductController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Update product active state")]
     public async Task<IActionResult> UpdateActiveState([FromBody] UpdateProductActiveStateDto dto)
     {
         try
@@ -113,6 +120,7 @@ public class ProductController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Delete a product")]
     public async Task<IActionResult> Delete(Guid id)
     {
         try

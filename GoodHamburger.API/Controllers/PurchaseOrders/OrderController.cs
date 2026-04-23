@@ -21,6 +21,7 @@ public class OrderController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<Order>), StatusCodes.Status200OK)]
+    [EndpointSummary("Get all orders")]
     public async Task<IActionResult> GetAll()
     {
         var orders = await _orderService.GetAllAsync();
@@ -30,6 +31,7 @@ public class OrderController : ControllerBase
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(Order), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Get an order by ID")]
     public async Task<IActionResult> Get(Guid id)
     {
         var order = await _orderService.GetAsync(new GetOrderDto(id));
@@ -41,6 +43,7 @@ public class OrderController : ControllerBase
 
     [HttpGet("search")]
     [ProducesResponseType(typeof(IEnumerable<Order>), StatusCodes.Status200OK)]
+    [EndpointSummary("Find orders by criteria")]
     public async Task<IActionResult> Find([FromQuery] FindOrderDto dto)
     {
         var orders = await _orderService.FindAsync(dto);
@@ -50,6 +53,7 @@ public class OrderController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(Order), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Create a new order")]
     public async Task<IActionResult> Create([FromBody] CreateOrderDto dto)
     {
         try
@@ -67,6 +71,7 @@ public class OrderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Update order status")]
     public async Task<IActionResult> UpdateActiveState([FromBody] UpdateOrderStatusDto dto)
     {
         try

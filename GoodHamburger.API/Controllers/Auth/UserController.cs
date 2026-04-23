@@ -22,6 +22,7 @@ public class UserController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<User>), StatusCodes.Status200OK)]
+    [EndpointSummary("Get all users")]
     public async Task<IActionResult> ObterTodos(CancellationToken cancellationToken)
     {
         var users = await _userService.GetAll(cancellationToken);
@@ -31,6 +32,7 @@ public class UserController : ControllerBase
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Get a user by ID")]
     public async Task<IActionResult> ObterPorId(Guid id, CancellationToken cancellationToken)
     {
         try
@@ -47,6 +49,7 @@ public class UserController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(User), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Create a new user")]
     public async Task<IActionResult> Criar([FromBody] CreateUserDto dto, CancellationToken cancellationToken)
     {
         try
@@ -64,6 +67,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Update user information")]
     public async Task<IActionResult> Alterar([FromBody] UpdateUserDto dto, CancellationToken cancellationToken)
     {
         try
@@ -85,6 +89,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Change user password")]
     public async Task<IActionResult> AlterarSenha([FromBody] ChangeUserPasswordDto dto, CancellationToken cancellationToken)
     {
         try
@@ -106,6 +111,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Update user active state")]
     public async Task<IActionResult> Inativar(UpdateUserActiveStateDto dto, CancellationToken cancellationToken)
     {
         try

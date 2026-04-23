@@ -29,6 +29,7 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [EndpointSummary("User login")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto, CancellationToken cancellationToken)
     {
         var user = await _UserRepository.GetByEmailAsync(dto.Email, cancellationToken);
@@ -48,6 +49,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [EndpointSummary("Reset user password")]
     public async Task<IActionResult> RedefinirSenha([FromBody] ResetUserPasswordDto dto, CancellationToken cancellationToken)
     {
         try
