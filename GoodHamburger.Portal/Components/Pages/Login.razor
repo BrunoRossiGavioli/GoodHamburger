@@ -1,0 +1,111 @@
+@page "/login"
+@using GoodHamburger.Portal.Services
+@using MudBlazor
+@inject AuthService AuthService
+@inject CustomAuthStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>Login - Good Hamburger</PageTitle>
+
+<div class="login-container">
+    <MudCard>
+        <MudCardContent>
+            <h4 style="text-align: center; margin-bottom: 10px;">Good Hamburger</h4>
+            <p style="text-align: center; margin-bottom: 20px; color: gray;">Sistema de Gerenciamento</p>
+
+            <MudTextField @bind-Value="email"
+                          Label="Email"
+                          Variant="Variant.Outlined"
+                          FullWidth="true"
+                          Margin="Margin.Normal"
+                          InputType="InputType.Email" />
+
+            <MudTextField @bind-Value="password"
+                          Label="Senha"
+                          Variant="Variant.Outlined"
+                          FullWidth="true"
+                          Margin="Margin.Normal"
+                          InputType="InputType.Password" />
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Margin="Margin.Normal">
+                    @errorMessage
+                </MudAlert>
+            }
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       FullWidth="true"
+                       Size="Size.Large"
+                       OnClick="LoginAsync"
+                       Disabled="isLoading"
+                       Class="mt-4">
+                @if (isLoading)
+                {
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                    <span class="ms-2">Autenticando...</span>
+                }
+                else
+                {
+                    <span>Entrar</span>
+                }
+            </MudButton>
+        </MudCardContent>
+    </MudCard>
+</div>
+
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+</style>
+
+@code {
+    private string email = string.Empty;
+    private string password = string.Empty;
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+
+    private async Task LoginAsync()
+    {
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage = "Email e senha são obrigatórios.";
+            return;
+        }
+
+        isLoading = true;
+        errorMessage = string.Empty;
+
+        try
+        {
+            var result = await AuthService.LoginAsync(email, password);
+            if (result.Succeeded)
+            {
+                var token = await AuthService.GetAccessTokenAsync();
+                if (token is not null)
+                {
+                    await AuthStateProvider.NotifyLoginAsync(token);
+                    NavigationManager.NavigateTo("/");
+                }
+            }
+            else
+            {
+                errorMessage = result.Error ?? "Erro ao fazer login.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

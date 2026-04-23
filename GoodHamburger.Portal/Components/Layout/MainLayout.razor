@@ -1,9 +1,50 @@
 ﻿@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@inject CustomAuthStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
 
-@Body
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <h5 style="margin: 0; margin-left: 12px;">Good Hamburger</h5>
+        <MudSpacer />
+        <AuthorizeView Context="auth">
+            <Authorized>
+                <MudMenu Icon="@Icons.Material.Filled.AccountCircle">
+                    <MudMenuItem Disabled="true">
+                        <span style="font-size: 0.875rem;">@auth.User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")?.Value</span>
+                    </MudMenuItem>
+                    <MudDivider />
+                    <MudMenuItem OnClick="LogoutAsync">
+                        <MudIcon Icon="@Icons.Material.Filled.Logout" Class="mr-2" />
+                        Sair
+                    </MudMenuItem>
+                </MudMenu>
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Color="Color.Inherit" Href="/login">Login</MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudAppBar>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private async Task LogoutAsync()
+    {
+        await AuthStateProvider.NotifyLogoutAsync();
+        NavigationManager.NavigateTo("/login", forceLoad: true);
+    }
+}

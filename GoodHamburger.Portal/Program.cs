@@ -1,4 +1,7 @@
 using GoodHamburger.Portal.Components;
+using GoodHamburger.Portal.Services;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +11,21 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddMudServices();
+
+// Add authentication and authorization
+builder.Services.AddScoped<ProtectedSessionStorage>();
+builder.Services.AddScoped<ILocalStorageService, ProtectedSessionStorageService>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<CustomAuthStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<CustomAuthStateProvider>());
+builder.Services.AddAuthorizationCore();
+
+// Configure HttpClient with TokenRefreshHandler
+builder.Services.AddScoped<TokenRefreshHandler>();
+builder.Services.AddHttpClient("ApiClient", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"] ?? throw new InvalidOperationException("ApiBaseUrl is not configured."));
+}).AddHttpMessageHandler<TokenRefreshHandler>();
 
 var app = builder.Build();
 

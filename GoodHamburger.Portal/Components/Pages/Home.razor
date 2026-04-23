@@ -1,7 +1,19 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Home - Good Hamburger</PageTitle>
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
+<div style="padding: 20px;">
+    <AuthorizeView Context="auth">
+        <Authorized>
+            <h3>Bem-vindo, @auth.User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")?.Value!</h3>
+            <p>Sistema de Gerenciamento Good Hamburger</p>
+        </Authorized>
+        <NotAuthorized>
+            <div class="text-center" style="margin-top: 50px;">
+                <h4>Acesso não autorizado</h4>
+                <p>Por favor, <a href="/login">faça login</a> para continuar.</p>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
