@@ -4,6 +4,7 @@
     <File Path="TODO.Md" />
   </Folder>
   <Project Path="GoodHamburger.API/GoodHamburger.API.csproj" />
+  <Project Path="GoodHamburger.Portal/GoodHamburger.Portal.csproj" Id="e7ad123f-aea5-43d6-81d8-38092b187a4e" />
   <Project Path="GoodHamburger.Shared/GoodHamburger.Shared.csproj" />
   <Project Path="GoodHamburger.Tests/GoodHamburger.Tests.csproj" />
 </Solution>
