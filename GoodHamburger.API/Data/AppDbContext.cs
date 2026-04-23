@@ -18,6 +18,7 @@ public class AppDbContext : IdentityDbContext<UserEntity, IdentityRole<Guid>, Gu
     public DbSet<ProductPriceEntity> ProductPrices { get; set; }
     public DbSet<OrderEntity> Orders { get; set; }
     public DbSet<OrderItemEntity> OrderItems { get; set; }
+    public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -170,6 +171,21 @@ public class AppDbContext : IdentityDbContext<UserEntity, IdentityRole<Guid>, Gu
                 .WithMany()
                 .HasForeignKey(e => e.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<RefreshTokenEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+            entity.HasIndex(e => e.Token).IsUnique();
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.Property(e => e.Token).IsRequired();
+            entity.Property(e => e.CreatedAt);
+            entity.Property(e => e.IsRevoked).HasDefaultValue(false);
         });
     }
 }

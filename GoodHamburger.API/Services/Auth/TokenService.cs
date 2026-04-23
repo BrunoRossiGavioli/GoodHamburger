@@ -11,17 +11,22 @@ namespace GoodHamburger.API.Services.Auth;
 public class TokenService : ITokenService
 {
     private readonly IConfiguration _configuration;
-    private readonly IUserRepository _UserRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
 
-    public TokenService(IConfiguration configuration, IUserRepository UserRepository)
+    public TokenService(
+        IConfiguration configuration,
+        IUserRepository userRepository,
+        IRefreshTokenRepository refreshTokenRepository)
     {
         _configuration = configuration;
-        _UserRepository = UserRepository;
+        _userRepository = userRepository;
+        _refreshTokenRepository = refreshTokenRepository;
     }
 
     public async Task<TokenResponseDto> GerarTokenAsync(UserEntity user)
     {
-        var roles = await _UserRepository.GetAllRoles(user);
+        var roles = await _userRepository.GetAllRoles(user);
 
         var claims = new List<Claim>
         {
@@ -45,11 +50,46 @@ public class TokenService : ITokenService
             expires: expiracao,
             signingCredentials: credentials);
 
+        var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
+
+        var refreshToken = new RefreshTokenEntity
+        {
+            Token = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N"),
+            UserId = user.Id,
+            ExpiresAt = DateTime.UtcNow.AddDays(7),
+            CreatedAt = DateTime.UtcNow,
+            IsRevoked = false
+        };
+
+        await _refreshTokenRepository.CreateAsync(refreshToken);
+
         return new TokenResponseDto(
-            new JwtSecurityTokenHandler().WriteToken(token),
+            accessToken,
+            refreshToken.Token,
             user.Email!,
             user.Name,
             roles,
             expiracao);
+    }
+
+    public async Task<TokenResponseDto?> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+    {
+        var storedToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken);
+
+        if (storedToken is null || storedToken.IsRevoked || storedToken.ExpiresAt < DateTime.UtcNow)
+            return null;
+
+        var user = storedToken.User;
+        if (user is null || !user.IsActive)
+            return null;
+
+        await _refreshTokenRepository.RevokeAsync(refreshToken, cancellationToken);
+
+        return await GerarTokenAsync(user);
+    }
+
+    public async Task RevokeAllUserTokensAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        await _refreshTokenRepository.RevokeAllUserTokensAsync(userId, cancellationToken);
     }
 }
