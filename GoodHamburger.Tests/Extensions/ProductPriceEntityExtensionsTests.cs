@@ -60,7 +60,7 @@ public class ProductPriceEntityExtensionsTests
     public void GetCurrentPrice_SingleActivePrice_ReturnsIt()
     {
         var productId = Guid.NewGuid();
-        var price = BuildPrice(productId: productId, start: DateTime.UtcNow.AddDays(-1), end: null);
+        var price = BuildPrice(productId: productId, start: Datetime.Now.AddDays(-1), end: null);
 
         var result = new[] { price }.GetCurrentPrice(productId);
 
@@ -86,7 +86,7 @@ public class ProductPriceEntityExtensionsTests
         var futurePrice = BuildPrice(productId: productId, start: new DateTime(2030, 1, 1), end: null);
 
         Assert.Throws<InvalidOperationException>(() =>
-            new[] { futurePrice }.GetCurrentPrice(productId, DateTime.UtcNow));
+            new[] { futurePrice }.GetCurrentPrice(productId, Datetime.Now));
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public class ProductPriceEntityExtensionsTests
     {
         var productId = Guid.NewGuid();
         var otherId = Guid.NewGuid();
-        var price = BuildPrice(productId: otherId, start: DateTime.UtcNow.AddDays(-1), end: null);
+        var price = BuildPrice(productId: otherId, start: Datetime.Now.AddDays(-1), end: null);
 
         Assert.Throws<InvalidOperationException>(() =>
             new[] { price }.GetCurrentPrice(productId));
@@ -112,7 +112,7 @@ public class ProductPriceEntityExtensionsTests
             Name = "X Burger",
             Prices =
             [
-                BuildPrice(productId: productId, start: DateTime.UtcNow.AddDays(-1), end: null, value: 5.00m)
+                BuildPrice(productId: productId, start: Datetime.Now.AddDays(-1), end: null, value: 5.00m)
             ]
         };
 
@@ -153,7 +153,7 @@ public class ProductPriceEntityExtensionsTests
         Id = Guid.NewGuid(),
         ProductId = productId ?? Guid.NewGuid(),
         Value = value,
-        StartDate = start ?? DateTime.UtcNow.AddDays(-1),
+        StartDate = start ?? Datetime.Now.AddDays(-1),
         EndDate = end,
         Reason = "Test"
     };

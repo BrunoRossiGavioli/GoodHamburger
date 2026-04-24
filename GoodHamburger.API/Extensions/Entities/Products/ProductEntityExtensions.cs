@@ -13,7 +13,7 @@ namespace GoodHamburger.API.Extensions.Entities.Products
         public static ProductPriceEntity GetCurrentPrice(this ProductEntity product,
             DateTime? date = null)
         {
-            var targetDate = date ?? DateTime.UtcNow;
+            var targetDate = date ?? Datetime.Now;
 
             return product.Prices.GetCurrentPrice(product.Id, targetDate);
         }

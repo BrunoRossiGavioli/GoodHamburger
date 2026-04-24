@@ -41,7 +41,7 @@ public class TokenService : ITokenService
 
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var expiresInMinutes = int.Parse(_configuration["Jwt:ExpiresInMinutes"] ?? "60");
-        var expiracao = DateTime.UtcNow.AddMinutes(expiresInMinutes);
+        var expiracao = Datetime.Now.AddMinutes(expiresInMinutes);
 
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"],
@@ -56,8 +56,8 @@ public class TokenService : ITokenService
         {
             Token = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N"),
             UserId = user.Id,
-            ExpiresAt = DateTime.UtcNow.AddDays(7),
-            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = Datetime.Now.AddDays(7),
+            CreatedAt = Datetime.Now,
             IsRevoked = false
         };
 
@@ -76,7 +76,7 @@ public class TokenService : ITokenService
     {
         var storedToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken);
 
-        if (storedToken is null || storedToken.IsRevoked || storedToken.ExpiresAt < DateTime.UtcNow)
+        if (storedToken is null || storedToken.IsRevoked || storedToken.ExpiresAt < Datetime.Now)
             return null;
 
         var user = storedToken.User;

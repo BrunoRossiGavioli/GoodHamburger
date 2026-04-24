@@ -104,7 +104,7 @@ public class OrderServiceTests
         _orderRepoMock.Setup(r => r.FindAsync(It.IsAny<Expression<Func<OrderEntity, bool>>>(), It.IsAny<CancellationToken>()))
                       .ReturnsAsync(entities);
 
-        var result = await _sut.FindAsync(new FindOrderDto(OrderDate: DateTime.UtcNow.Date));
+        var result = await _sut.FindAsync(new FindOrderDto(OrderDate: Datetime.Now.Date));
 
         Assert.Single(result);
     }
@@ -327,7 +327,7 @@ public class OrderServiceTests
     [Fact]
     public async Task CreateAsync_AnonymousCustomer_SetsOrderDateToUtcNow()
     {
-        var before = DateTime.UtcNow;
+        var before = Datetime.Now;
         var sandwich = BuildProductEntity(type: ProductType.Sandwich, price: 5.00m);
         SetupBasicMocks(products: [sandwich]);
 
@@ -594,7 +594,7 @@ public class OrderServiceTests
         CustomerName = "João",
         CustomerPhone = "11999999999",
         CustomerAddress = "Rua A, 1",
-        OrderDate = DateTime.UtcNow,
+        OrderDate = Datetime.Now,
         Subtotal = 5.00m,
         Discount = 0m,
         Total = 5.00m,
@@ -628,7 +628,7 @@ public class OrderServiceTests
                     Id = Guid.NewGuid(),
                     ProductId = id,
                     Value = price,
-                    StartDate = DateTime.UtcNow.AddDays(-1),
+                    StartDate = Datetime.Now.AddDays(-1),
                     EndDate = null,
                     Reason = "Inicial"
                 }

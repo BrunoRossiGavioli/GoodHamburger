@@ -51,7 +51,7 @@ public class ProductService : IProductService
         {
             Reason = "Preço inicial",
             Value = dto.Price,
-            StartDate = DateTime.UtcNow
+            StartDate = Datetime.Now
         }];
 
         await _productRepository.SaveChangesAsync();

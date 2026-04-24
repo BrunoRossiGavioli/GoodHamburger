@@ -13,7 +13,7 @@ public static class ProductPriceEntityExtensions
     /// <returns>Preços ativos na data informada</returns>
     public static IQueryable<ProductPriceEntity> ValidAt(this IQueryable<ProductPriceEntity> query, DateTime? date = null)
     {
-        var targetDate = date ?? DateTime.UtcNow;
+        var targetDate = date ?? Datetime.Now;
 
         return query.Where(p => p.StartDate <= targetDate &&
                                (p.EndDate == null || p.EndDate >= targetDate));
@@ -31,7 +31,7 @@ public static class ProductPriceEntityExtensions
         Guid productId,
         DateTime? date = null)
     {
-        var targetDate = date ?? DateTime.UtcNow;
+        var targetDate = date ?? Datetime.Now;
 
         return await query
             .Where(p => p.ProductId == productId)
@@ -48,7 +48,7 @@ public static class ProductPriceEntityExtensions
     /// <returns>Preços ativos na data informada</returns>
     public static IEnumerable<ProductPriceEntity> ValidAt(this IEnumerable<ProductPriceEntity> query, DateTime? date = null)
     {
-        var targetDate = date ?? DateTime.UtcNow;
+        var targetDate = date ?? Datetime.Now;
 
         return query.Where(p => p.StartDate <= targetDate &&
                                (p.EndDate == null || p.EndDate >= targetDate));
@@ -66,7 +66,7 @@ public static class ProductPriceEntityExtensions
         Guid productId,
         DateTime? date = null)
     {
-        var targetDate = date ?? DateTime.UtcNow;
+        var targetDate = date ?? Datetime.Now;
 
         return query
             .Where(p => p.ProductId == productId)

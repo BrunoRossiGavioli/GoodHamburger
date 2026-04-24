@@ -365,3 +365,11 @@ FodyWeavers.xsd
 *.db
 *.db-shm
 *.db-wal
+/CHECKLIST.md
+/EXECUTAR_PROJETO.md
+/FAQ.md
+/GoodHamburger.slnLaunch
+/IMPLEMENTACAO_JWT_REFRESH_TOKEN.md
+/README_IMPLEMENTACAO.md
+/SUMARIO_FINAL.md
+/TESTES.md

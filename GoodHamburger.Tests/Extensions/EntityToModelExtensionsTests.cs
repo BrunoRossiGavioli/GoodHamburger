@@ -127,7 +127,7 @@ public class EntityToModelExtensionsTests
     public void MapOrder_AnonymousCustomer_MapsItemsWithProductPrice()
     {
         var productId = Guid.NewGuid();
-        var orderDate = DateTime.UtcNow;
+        var orderDate = Datetime.Now;
         var product = BuildProduct(productId, name: "Batata Frita", price: 2.00m, type: ProductType.Fries);
 
         var entity = new OrderEntity
@@ -175,7 +175,7 @@ public class EntityToModelExtensionsTests
             Id = Guid.NewGuid(),
             CustomerId = customerId,
             Customer = customer,
-            OrderDate = DateTime.UtcNow,
+            OrderDate = Datetime.Now,
             Subtotal = 5.00m, Discount = 0m, Total = 5.00m,
             Status = OrderStatus.Confirmed,
             Items = []
@@ -208,7 +208,7 @@ public class EntityToModelExtensionsTests
                     Id = Guid.NewGuid(),
                     ProductId = productId,
                     Value = price,
-                    StartDate = DateTime.UtcNow.AddDays(-1),
+                    StartDate = Datetime.Now.AddDays(-1),
                     EndDate = null,
                     Reason = "Inicial"
                 }

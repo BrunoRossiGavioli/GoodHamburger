@@ -52,7 +52,7 @@ public static class DatabaseSeeder
             UserName = adminEmail,
             EmailConfirmed = true,
             IsActive = true,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = Datetime.Now
         };
 
         var result = await userManager.CreateAsync(admin, adminSenha);
@@ -76,7 +76,7 @@ public static class DatabaseSeeder
             UserName = funcionarioEmail,
             EmailConfirmed = true,
             IsActive = true,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = Datetime.Now
         };
 
         var result = await userManager.CreateAsync(funcionario, funcionarioSenha);
@@ -104,7 +104,7 @@ public static class DatabaseSeeder
                 {
                     Id = Guid.Parse("b1a2c3d4-0001-4e5f-8a7b-9c0d1e2f3a4b"),
                     Value = 18.90m,
-                    StartDate = DateTime.UtcNow,
+                    StartDate = Datetime.Now,
                     Reason = "Preço inicial"
                 }
             }
@@ -122,7 +122,7 @@ public static class DatabaseSeeder
                 {
                     Id = Guid.Parse("b1a2c3d4-0002-4e5f-8a7b-9c0d1e2f3a4b"),
                     Value = 16.90m,
-                    StartDate = DateTime.UtcNow,
+                    StartDate = Datetime.Now,
                     Reason = "Preço inicial"
                 }
             }
@@ -140,7 +140,7 @@ public static class DatabaseSeeder
                 {
                     Id = Guid.Parse("b1a2c3d4-0003-4e5f-8a7b-9c0d1e2f3a4b"),
                     Value = 22.90m,
-                    StartDate = DateTime.UtcNow,
+                    StartDate = Datetime.Now,
                     Reason = "Preço inicial"
                 }
             }
@@ -159,7 +159,7 @@ public static class DatabaseSeeder
                 {
                     Id = Guid.Parse("b1a2c3d4-0004-4e5f-8a7b-9c0d1e2f3a4b"),
                     Value = 7.90m,
-                    StartDate = DateTime.UtcNow,
+                    StartDate = Datetime.Now,
                     Reason = "Preço inicial"
                 }
             }
@@ -177,7 +177,7 @@ public static class DatabaseSeeder
                 {
                     Id = Guid.Parse("b1a2c3d4-0006-4e5f-8a7b-9c0d1e2f3a4b"),
                     Value = 14.90m,
-                    StartDate = DateTime.UtcNow,
+                    StartDate = Datetime.Now,
                     Reason = "Preço inicial"
                 }
             }
@@ -195,7 +195,7 @@ public static class DatabaseSeeder
                 {
                     Id = Guid.Parse("b1a2c3d4-0007-4e5f-8a7b-9c0d1e2f3a4b"),
                     Value = 12.90m,
-                    StartDate = DateTime.UtcNow,
+                    StartDate = Datetime.Now,
                     Reason = "Preço inicial"
                 }
             }
@@ -213,7 +213,7 @@ public static class DatabaseSeeder
                 {
                     Id = Guid.Parse("b1a2c3d4-0008-4e5f-8a7b-9c0d1e2f3a4b"),
                     Value = 18.90m,
-                    StartDate = DateTime.UtcNow,
+                    StartDate = Datetime.Now,
                     Reason = "Preço inicial"
                 }
             }
@@ -232,7 +232,7 @@ public static class DatabaseSeeder
                 {
                     Id = Guid.Parse("b1a2c3d4-0005-4e5f-8a7b-9c0d1e2f3a4b"),
                     Value = 6.90m,
-                    StartDate = DateTime.UtcNow,
+                    StartDate = Datetime.Now,
                     Reason = "Preço inicial"
                 }
             }
@@ -250,7 +250,7 @@ public static class DatabaseSeeder
                 {
                     Id = Guid.Parse("b1a2c3d4-0009-4e5f-8a7b-9c0d1e2f3a4b"),
                     Value = 7.50m,
-                    StartDate = DateTime.UtcNow,
+                    StartDate = Datetime.Now,
                     Reason = "Preço inicial"
                 }
             }
@@ -268,7 +268,7 @@ public static class DatabaseSeeder
                 {
                     Id = Guid.Parse("b1a2c3d4-0010-4e5f-8a7b-9c0d1e2f3a4b"),
                     Value = 9.90m,
-                    StartDate = DateTime.UtcNow,
+                    StartDate = Datetime.Now,
                     Reason = "Preço inicial"
                 }
             }
@@ -286,7 +286,7 @@ public static class DatabaseSeeder
                 {
                     Id = Guid.Parse("b1a2c3d4-0011-4e5f-8a7b-9c0d1e2f3a4b"),
                     Value = 16.90m,
-                    StartDate = DateTime.UtcNow,
+                    StartDate = Datetime.Now,
                     Reason = "Preço inicial"
                 }
             }
@@ -304,7 +304,7 @@ public static class DatabaseSeeder
                 {
                     Id = Guid.Parse("b1a2c3d4-0012-4e5f-8a7b-9c0d1e2f3a4b"),
                     Value = 4.50m,
-                    StartDate = DateTime.UtcNow,
+                    StartDate = Datetime.Now,
                     Reason = "Preço inicial"
                 }
             }

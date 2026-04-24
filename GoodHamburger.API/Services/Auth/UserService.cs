@@ -54,7 +54,7 @@ public class UserService : IUserService
             UserName = dto.Email,
             EmailConfirmed = true,
             IsActive = true,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = Datetime.Now
         };
 
         var createResult = await _userRepository.CreateAsync(user, dto.Password);

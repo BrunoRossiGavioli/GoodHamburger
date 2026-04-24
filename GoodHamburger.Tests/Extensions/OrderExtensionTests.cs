@@ -11,7 +11,7 @@ public class OrderExtensionTests
     public void FromCustomer_NullCustomer_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            OrderExtension.FromCustomer(Guid.NewGuid(), DateTime.UtcNow, 5m, 0m, 5m, null!, OrderStatus.Pending, []));
+            OrderExtension.FromCustomer(Guid.NewGuid(), Datetime.Now, 5m, 0m, 5m, null!, OrderStatus.Pending, []));
     }
 
     [Fact]
@@ -44,7 +44,7 @@ public class OrderExtensionTests
             new OrderItem(2, "Sem sal", null!)
         ];
 
-        var order = OrderExtension.FromCustomer(Guid.NewGuid(), DateTime.UtcNow, 10m, 0m, 10m, customer, OrderStatus.Pending, items);
+        var order = OrderExtension.FromCustomer(Guid.NewGuid(), Datetime.Now, 10m, 0m, 10m, customer, OrderStatus.Pending, items);
 
         Assert.Single(order.Items);
         Assert.Equal(2, order.Items.First().Quantity);

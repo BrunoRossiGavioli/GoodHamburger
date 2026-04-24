@@ -93,7 +93,7 @@ public class OrderService : IOrderService
         var (subtotal, discount, total) = orderItems.CalculateSubtotalAndDiscount();
 
         // Persist entity
-        orderEntity.OrderDate = DateTime.UtcNow;
+        orderEntity.OrderDate = Datetime.Now;
         orderEntity.Subtotal = subtotal;
         orderEntity.Discount = discount;
         orderEntity.Total = total;

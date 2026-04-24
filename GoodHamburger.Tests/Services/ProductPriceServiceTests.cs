@@ -92,7 +92,7 @@ public class ProductPriceServiceTests
                         .ReturnsAsync(false);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _sut.CreateAsync(new CreateProductPriceDto(Guid.NewGuid(), 5.00m, DateTime.UtcNow, null, "Reason")));
+            _sut.CreateAsync(new CreateProductPriceDto(Guid.NewGuid(), 5.00m, Datetime.Now, null, "Reason")));
     }
 
     // ── DeleteAsync ───────────────────────────────────────────────────────────
@@ -128,7 +128,7 @@ public class ProductPriceServiceTests
         Id = id ?? Guid.NewGuid(),
         ProductId = productId ?? Guid.NewGuid(),
         Value = 5.00m,
-        StartDate = startDate ?? DateTime.UtcNow.AddDays(-1),
+        StartDate = startDate ?? Datetime.Now.AddDays(-1),
         EndDate = null,
         Reason = "Preço inicial"
     };

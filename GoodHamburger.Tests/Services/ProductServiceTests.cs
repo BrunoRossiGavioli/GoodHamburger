@@ -225,7 +225,7 @@ public class ProductServiceTests
                     Id = Guid.NewGuid(),
                     ProductId = productId,
                     Value = price,
-                    StartDate = DateTime.UtcNow.AddDays(-1),
+                    StartDate = Datetime.Now.AddDays(-1),
                     EndDate = null,
                     Reason = "Preço inicial"
                 }

@@ -147,7 +147,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider, IAsyncDispos
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
-            return jwtToken.ValidTo < DateTime.UtcNow.AddMinutes(5);
+            return jwtToken.ValidTo < Datetime.Now.AddMinutes(5);
         }
         catch
         {
