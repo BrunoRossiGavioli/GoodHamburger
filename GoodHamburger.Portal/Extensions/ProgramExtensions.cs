@@ -2,6 +2,7 @@
 using GoodHamburger.Portal.Services.Customers;
 using GoodHamburger.Portal.Services.Orders;
 using GoodHamburger.Portal.Services.Products;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
@@ -19,12 +20,21 @@ public static class ProgramExtensions
     /// <returns>The same instance of <see cref="IServiceCollection"/> that was provided, to support method chaining.</returns>
     public static IServiceCollection AddPortalAuthenticationAndAuthorization(this IServiceCollection services)
     {
+        services.AddAuthorizationCore();
+        services.AddCascadingAuthenticationState();
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultScheme = "bearer";
+            options.DefaultChallengeScheme = "bearer";
+        })
+        .AddScheme<AuthenticationSchemeOptions, BearerAuthenticationHandler>("bearer", null);
+
         services.AddScoped<ProtectedLocalStorage>();
         services.AddScoped<ILocalStorageService, ProtectedSessionStorageService>();
         services.AddScoped<AuthService>();
         services.AddScoped<CustomAuthStateProvider>();
         services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<CustomAuthStateProvider>());
-        services.AddAuthorizationCore();
 
         return services;
     }
@@ -41,7 +51,7 @@ public static class ProgramExtensions
     /// <exception cref="InvalidOperationException">Thrown if the 'ApiBaseUrl' configuration value is missing or null.</exception>
     public static IServiceCollection AddApiHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<TokenRefreshHandler>();
+        services.AddTransient<TokenRefreshHandler>();
         services.AddHttpClient("ApiClient", client =>
         {
             client.BaseAddress = new Uri(configuration["ApiBaseUrl"] ?? throw new InvalidOperationException("ApiBaseUrl is not configured."));
