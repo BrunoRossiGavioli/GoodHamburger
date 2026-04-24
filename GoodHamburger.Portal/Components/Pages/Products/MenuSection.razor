@@ -1,0 +1,45 @@
+﻿@using GoodHamburger.Shared.Models.Products
+@using GoodHamburger.Shared.Models.PurchaseOrders
+@using GoodHamburger.Shared.Enums
+@using GoodHamburger.Shared.Extensions.Models
+
+<div class="menu-section">
+    @foreach (var group in ProductGroups ?? Enumerable.Empty<IGrouping<ProductType, Product>>())
+    {
+        <MudText Typo="Typo.h5" Class="mb-2 mt-4">@group.Key.GetDisplayName()</MudText>
+        <MudGrid Spacing="2">
+            @foreach (var product in group)
+            {
+                var isAlreadyAdded = Items?.Any(i => i.Product.Id == product.Id) ?? false;
+                var typeConflict = Items?.Any(i => i.Product.Type == product.Type) ?? false;
+                var canAdd = !isAlreadyAdded && !typeConflict;
+
+                <MudItem xs="6" sm="4" lg="3">
+                    <MudCard>
+                        <MudCardContent Class="d-flex flex-column justify-space-between" Style="height: 140px;">
+                            <div>
+                                <MudText Typo="Typo.body1" Class="font-weight-bold">@product.Name</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">@product.Price.ToString("C")</MudText>
+                            </div>
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       Size="Size.Small"
+                                       StartIcon="@Icons.Material.Filled.Add"
+                                       Disabled="@(!canAdd)"
+                                       OnClick="@(() => OnAddProduct.InvokeAsync(product))"
+                                       FullWidth="true">
+                                Adicionar
+                            </MudButton>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+</div>
+
+@code {
+    [Parameter] public IEnumerable<IGrouping<ProductType, Product>>? ProductGroups { get; set; }
+    [Parameter] public EventCallback<Product> OnAddProduct { get; set; }
+    [Parameter] public List<OrderItem>? Items { get; set; }
+}

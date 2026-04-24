@@ -1,0 +1,139 @@
+﻿@using GoodHamburger.Portal.Services.Customers
+@using GoodHamburger.Shared.Models.PurchaseOrders
+@using GoodHamburger.Shared.Enums
+@using GoodHamburger.Shared.Models.Customers
+
+<div class="order-summary">
+    <MudPaper Elevation="1" Class="pa-4">
+        <MudText Typo="Typo.h5" Class="mb-3">Resumo do Pedido</MudText>
+
+        <MudExpansionPanels Class="mb-4">
+            <MudExpansionPanel Text="Cliente">
+                <MudRadioGroup T="bool" @bind-Value="@UseExistingCustomer" Class="mb-2">
+                    <MudRadio Value="false" Color="Color.Primary">Cliente novo (não cadastrado)</MudRadio>
+                    <MudRadio Value="true" Color="Color.Primary">Cliente existente</MudRadio>
+                </MudRadioGroup>
+
+                @if (UseExistingCustomer)
+                {
+                    <MudAutocomplete T="Customer"
+                                     Label="Buscar cliente"
+                                     SearchFunc="@SearchCustomersAsync"
+                                     ValueChanged="OnExistingCustomerSelected"
+                                     ToStringFunc="@(c => c is null ? string.Empty : $"{c.Name} - {c.Phone}")" />
+                }
+                else
+                {
+                    <MudTextField @bind-Value="CustomerName" Label="Nome do cliente" Variant="Variant.Outlined" Margin="Margin.Dense" Required="true" />
+                    <MudTextField @bind-Value="CustomerPhone" Label="Telefone" Variant="Variant.Outlined" Margin="Margin.Dense" Mask="@(new PatternMask("(00) 00000-0000"))" />
+                    <MudTextField @bind-Value="CustomerAddress" Label="Endereço" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                }
+            </MudExpansionPanel>
+        </MudExpansionPanels>
+
+        <!-- Restante do conteúdo (itens, totais) igual ao anterior -->
+        @if (Items is null || !Items.Any())
+        {
+            <MudAlert Severity="Severity.Info">Nenhum item adicionado.</MudAlert>
+        }
+        else
+        {
+            <MudList T="OrderItem" Class="mb-4">
+                @foreach (var item in Items)
+                {
+                    <MudListItem>
+                        <MudGrid Class="align-center justify-space-between">
+                            <MudItem xs="8">
+                                <MudText Typo="Typo.body2">@item.Product.Name</MudText>
+                            </MudItem>
+                            <MudItem xs="4" Class="d-flex align-center justify-end">
+                                <MudText Typo="Typo.body2" Class="mr-2">@item.Product.Price.ToString("C")</MudText>
+                                <MudIconButton Icon="@Icons.Material.Filled.RemoveCircleOutline"
+                                               Color="Color.Error"
+                                               Size="Size.Small"
+                                               OnClick="@(() => OnRemoveItem.InvokeAsync(item))" />
+                            </MudItem>
+                        </MudGrid>
+                    </MudListItem>
+                }
+            </MudList>
+
+            <MudDivider Class="mb-3" />
+
+            <MudGrid>
+                <MudItem xs="6"><MudText Typo="Typo.body2">Subtotal</MudText></MudItem>
+                <MudItem xs="6" Class="text-right"><MudText Typo="Typo.body2">@Subtotal.ToString("C")</MudText></MudItem>
+
+                @if (Discount > 0)
+                {
+                    <MudItem xs="6"><MudText Typo="Typo.body2" Color="Color.Success">Desconto</MudText></MudItem>
+                    <MudItem xs="6" Class="text-right"><MudText Typo="Typo.body2" Color="Color.Success">-@Discount.ToString("C")</MudText></MudItem>
+                }
+
+                <MudItem xs="6"><MudText Typo="Typo.h6">Total</MudText></MudItem>
+                <MudItem xs="6" Class="text-right"><MudText Typo="Typo.h6" Color="Color.Primary">@Total.ToString("C")</MudText></MudItem>
+            </MudGrid>
+        }
+
+        <MudGrid Class="mt-4" Spacing="2">
+            <MudItem xs="6">
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.ClearAll"
+                           OnClick="@(() => OnClear.InvokeAsync())" FullWidth="true"
+                           Disabled="@(!(Items?.Any() ?? false))">
+                    Limpar
+                </MudButton>
+            </MudItem>
+            <MudItem xs="6">
+                <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.CheckCircle"
+                           OnClick="@(() => OnCreateOrder.InvokeAsync())" FullWidth="true"
+                           Disabled="@(!(Items?.Any() ?? false))">
+                    Finalizar
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</div>
+
+@code {
+    [Parameter] public List<OrderItem>? Items { get; set; }
+    [Parameter] public EventCallback OnClear { get; set; }
+    [Parameter] public EventCallback OnCreateOrder { get; set; }
+    [Parameter] public EventCallback<OrderItem> OnRemoveItem { get; set; }
+    [Parameter] public decimal Subtotal { get; set; }
+    [Parameter] public decimal Discount { get; set; }
+    [Parameter] public decimal Total { get; set; }
+
+    #region Parâmetros de cliente
+    [Parameter] public string CustomerName { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> CustomerNameChanged { get; set; }
+    [Parameter] public string CustomerPhone { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> CustomerPhoneChanged { get; set; }
+    [Parameter] public string CustomerAddress { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> CustomerAddressChanged { get; set; }
+    [Parameter] public bool UseExistingCustomer { get; set; }
+    [Parameter] public EventCallback<bool> UseExistingCustomerChanged { get; set; }
+    [Parameter] public EventCallback<Customer> OnSelectExistingCustomer { get; set; }
+    #endregion
+
+    [Inject]
+    private CustomerService CustomerService { get; set; } = default!;
+
+    private async Task<IEnumerable<Customer>> SearchCustomersAsync(string searchText, CancellationToken ct)
+    {
+        return await CustomerService.FindAsync(name: searchText);
+    }
+
+    private void OnExistingCustomerSelected(Customer? customer)
+    {
+        if (customer != null)
+        {
+            CustomerName = customer.Name;
+            CustomerPhone = customer.Phone;
+            CustomerAddress = customer.Address;
+            CustomerNameChanged.InvokeAsync(CustomerName);
+            CustomerPhoneChanged.InvokeAsync(CustomerPhone);
+            CustomerAddressChanged.InvokeAsync(CustomerAddress);
+            OnSelectExistingCustomer.InvokeAsync(customer);
+        }
+    }
+}
