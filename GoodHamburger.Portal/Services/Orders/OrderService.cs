@@ -1,13 +1,14 @@
-﻿using GoodHamburger.Shared.DTOs.PurchaseOrders;
+﻿using GoodHamburger.Portal.Services.Auth;
+using GoodHamburger.Shared.DTOs.PurchaseOrders;
 using GoodHamburger.Shared.Models.PurchaseOrders;
 
 namespace GoodHamburger.Portal.Services.Orders;
 
 public class OrderService
 {
-    private readonly HttpClient _http;
+    private readonly ApiHttpClient _http;
 
-    public OrderService(HttpClient http)
+    public OrderService(ApiHttpClient http)
     {
         _http = http;
     }
@@ -17,7 +18,7 @@ public class OrderService
     /// </summary>
     /// <exception cref="HttpRequestException">401 Unauthorized, 403 Forbidden.</exception>
     public Task<List<Order>> GetAllAsync() =>
-        _http.GetFromJsonAsync<List<Order>>("api/orders")!;
+        _http.GetAsync<List<Order>>("api/orders")!;
 
     /// <summary>
     /// Obtém um pedido pelo ID.
@@ -25,7 +26,7 @@ public class OrderService
     /// <param name="id">ID do pedido.</param>
     /// <exception cref="HttpRequestException">401 Unauthorized, 403 Forbidden, 404 Not Found.</exception>
     public Task<Order> GetByIdAsync(Guid id) =>
-        _http.GetFromJsonAsync<Order>($"api/orders/{id}")!;
+        _http.GetAsync<Order>($"api/orders/{id}")!;
 
     /// <summary>
     /// Cria um novo pedido.
@@ -59,6 +60,6 @@ public class OrderService
         if (customerId.HasValue) query.Add($"CustomerId={customerId}");
         if (orderDate.HasValue) query.Add($"OrderDate={orderDate.Value:O}");
         var qs = query.Count > 0 ? "?" + string.Join("&", query) : "";
-        return (await _http.GetFromJsonAsync<List<Order>>($"api/orders/search{qs}"))!;
+        return (await _http.GetAsync<List<Order>>($"api/orders/search{qs}"))!;
     }
 }

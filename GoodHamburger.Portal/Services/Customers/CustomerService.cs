@@ -1,13 +1,14 @@
-﻿using GoodHamburger.Shared.DTOs.Customers;
+﻿using GoodHamburger.Portal.Services.Auth;
+using GoodHamburger.Shared.DTOs.Customers;
 using GoodHamburger.Shared.Models.Customers;
 
 namespace GoodHamburger.Portal.Services.Customers;
 
 public class CustomerService
 {
-    private readonly HttpClient _http;
+    private readonly ApiHttpClient _http;
 
-    public CustomerService(HttpClient http)
+    public CustomerService(ApiHttpClient http)
     {
         _http = http;
     }
@@ -17,7 +18,7 @@ public class CustomerService
     /// </summary>
     /// <exception cref="HttpRequestException">401 Unauthorized, 403 Forbidden.</exception>
     public Task<List<Customer>> GetAllAsync() =>
-        _http.GetFromJsonAsync<List<Customer>>("api/customers")!;
+        _http.GetAsync<List<Customer>>("api/customers")!;
 
     /// <summary>
     /// Obtém um cliente pelo ID.
@@ -25,7 +26,7 @@ public class CustomerService
     /// <param name="id">ID do cliente.</param>
     /// <exception cref="HttpRequestException">401 Unauthorized, 403 Forbidden, 404 Not Found.</exception>
     public Task<Customer> GetByIdAsync(Guid id) =>
-        _http.GetFromJsonAsync<Customer>($"api/customers/{id}")!;
+        _http.GetAsync<Customer>($"api/customers/{id}")!;
 
     /// <summary>
     /// Cadastra um novo cliente.
@@ -71,6 +72,6 @@ public class CustomerService
         if (!string.IsNullOrWhiteSpace(name)) query.Add($"Name={Uri.EscapeDataString(name)}");
         if (!string.IsNullOrWhiteSpace(phone)) query.Add($"Phone={Uri.EscapeDataString(phone)}");
         var qs = query.Count > 0 ? "?" + string.Join("&", query) : "";
-        return (await _http.GetFromJsonAsync<List<Customer>>($"api/customers/search{qs}"))!;
+        return (await _http.GetAsync<List<Customer>>($"api/customers/search{qs}"))!;
     }
 }

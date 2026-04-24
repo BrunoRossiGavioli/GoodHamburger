@@ -51,11 +51,12 @@ public static class ProgramExtensions
     /// <exception cref="InvalidOperationException">Thrown if the 'ApiBaseUrl' configuration value is missing or null.</exception>
     public static IServiceCollection AddApiHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddTransient<TokenRefreshHandler>();
         services.AddHttpClient("ApiClient", client =>
         {
-            client.BaseAddress = new Uri(configuration["ApiBaseUrl"] ?? throw new InvalidOperationException("ApiBaseUrl is not configured."));
-        }).AddHttpMessageHandler<TokenRefreshHandler>();
+            client.BaseAddress = new Uri(configuration["ApiBaseUrl"]
+                ?? throw new InvalidOperationException("ApiBaseUrl is not configured."));
+        });
+        
         return services;
     }
 
@@ -69,6 +70,13 @@ public static class ProgramExtensions
     /// <returns>The same instance of <see cref="IServiceCollection"/> that was provided, to allow for method chaining.</returns>
     public static IServiceCollection AddApiServices(this IServiceCollection services)
     {
+        services.AddScoped(sp =>
+        {
+            var factory = sp.GetRequiredService<IHttpClientFactory>();
+            return factory.CreateClient("ApiClient");
+        });
+        services.AddScoped<ApiHttpClient>();
+
         services.AddScoped<ProductService>();
         services.AddScoped<OrderService>();
         services.AddScoped<CustomerService>();

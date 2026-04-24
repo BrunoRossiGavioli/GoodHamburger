@@ -1,13 +1,14 @@
-﻿using GoodHamburger.Shared.DTOs.Products;
+﻿using GoodHamburger.Portal.Services.Auth;
+using GoodHamburger.Shared.DTOs.Products;
 using GoodHamburger.Shared.Models.Products;
 
 namespace GoodHamburger.Portal.Services.Products;
 
 public class ProductService
 {
-    private readonly HttpClient _http;
+    private readonly ApiHttpClient _http;
 
-    public ProductService(HttpClient http)
+    public ProductService(ApiHttpClient http)
     {
         _http = http;
     }
@@ -17,7 +18,7 @@ public class ProductService
     /// </summary>
     /// <exception cref="HttpRequestException">401 Unauthorized, 403 Forbidden.</exception>
     public Task<List<Product>> GetAllAsync() =>
-        _http.GetFromJsonAsync<List<Product>>("api/products")!;
+        _http.GetAsync<List<Product>>("api/products")!;
 
     /// <summary>
     /// Obtém um produto pelo ID.
@@ -25,7 +26,7 @@ public class ProductService
     /// <param name="id">ID do produto.</param>
     /// <exception cref="HttpRequestException">401 Unauthorized, 403 Forbidden, 404 Not Found.</exception>
     public Task<Product> GetByIdAsync(Guid id) =>
-        _http.GetFromJsonAsync<Product>($"api/products/{id}")!;
+        _http.GetAsync<Product>($"api/products/{id}")!;
 
     /// <summary>
     /// Cria um novo produto.
@@ -67,7 +68,7 @@ public class ProductService
     public async Task<List<Product>> FindAsync(string? name = null)
     {
         var qs = !string.IsNullOrWhiteSpace(name) ? $"?Name={Uri.EscapeDataString(name)}" : "";
-        return (await _http.GetFromJsonAsync<List<Product>>($"api/products/search{qs}"))!;
+        return (await _http.GetAsync<List<Product>>($"api/products/search{qs}"))!;
     }
 
     /// <summary>
@@ -109,6 +110,6 @@ public class ProductService
         var query = new List<string> { $"ProductId={productId}" };
         if (startDate.HasValue) query.Add($"StartDate={startDate.Value:O}");
         var qs = "?" + string.Join("&", query);
-        return (await _http.GetFromJsonAsync<List<ProductPrice>>($"api/product-prices/search{qs}"))!;
+        return (await _http.GetAsync<List<ProductPrice>>($"api/product-prices/search{qs}"))!;
     }
 }
