@@ -1,4 +1,6 @@
-﻿@inherits LayoutComponentBase
+﻿@using GoodHamburger.Shared.Constants
+@using System.Security.Claims
+@inherits LayoutComponentBase
 @inject CustomAuthStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 
@@ -7,15 +9,41 @@
 <MudSnackbarProvider />
 <MudPopoverProvider />
 
-<MudLayout>
+<MudLayout Style="fill: white;">
     <MudAppBar Elevation="1">
         <h5 style="margin: 0; margin-left: 12px;">Good Hamburger</h5>
         <MudSpacer />
+        <AuthorizeView>
+            <Authorized>
+                <MudMenu Label="Pedidos" Icon="@Icons.Material.Filled.FormatListBulleted" Color="Color.Inherit">
+                    <MudMenuItem Href="/">
+                        <MudIcon Icon="@Icons.Material.Filled.Add" Class="mr-2" />
+                        Novo pedido
+                    </MudMenuItem>
+                    <MudMenuItem Href="/orders">
+                        <MudIcon Icon="@Icons.Material.Filled.Fastfood" Class="mr-2" />
+                        Listar pedidos
+                    </MudMenuItem>
+                </MudMenu>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="@Roles.Administrador">
+            <MudMenu Label="Cadastros" Icon="@Icons.Material.Filled.Engineering" Color="Color.Inherit">
+                <MudMenuItem Href="/products">
+                    <MudIcon Icon="@Icons.Material.Filled.Fastfood" Class="mr-2" />
+                    Produtos
+                </MudMenuItem>
+                <MudMenuItem Href="/customers">
+                    <MudIcon Icon="@Icons.Material.Filled.Group" Class="mr-2" />
+                    Clientes
+                </MudMenuItem>
+            </MudMenu>
+        </AuthorizeView>
         <AuthorizeView Context="auth">
             <Authorized>
-                <MudMenu Icon="@Icons.Material.Filled.AccountCircle">
+                <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit">
                     <MudMenuItem Disabled="true">
-                        <span style="font-size: 0.875rem;">@auth.User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")?.Value</span>
+                        <span style="font-size: 0.875rem;">@auth.User.FindFirstValue(ClaimTypes.Name) - @auth.User.FindFirstValue(ClaimTypes.Role)</span>
                     </MudMenuItem>
                     <MudDivider />
                     <MudMenuItem OnClick="LogoutAsync">

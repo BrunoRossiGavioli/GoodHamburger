@@ -1,0 +1,185 @@
+﻿@page "/orders"
+@attribute [Authorize]
+
+@using GoodHamburger.Portal.Services.Orders
+@using GoodHamburger.Shared.Models.PurchaseOrders
+@using GoodHamburger.Shared.Enums
+
+@inject OrderService OrderService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<PageTitle>Pedidos - Good Hamburger</PageTitle>
+
+<MudContainer>
+    <MudText Typo="Typo.h4" Class="mb-4">Pedidos</MudText>
+
+    <MudGrid Class="mb-4">
+        <MudItem xs="12" sm="4">
+            <MudDatePicker Date="_filterDate"
+                           Label="Filtrar por data"
+                           Variant="Variant.Outlined"
+                           Clearable="true"
+                           DateChanged="OnFilterChanged" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudSelect T="OrderStatus?"
+                       Value="_filterStatus"
+                       Label="Filtrar por status"
+                       Variant="Variant.Outlined"
+                       Clearable="true"
+                       ValueChanged="OnFilterChanged"
+                       AnchorOrigin="Origin.BottomCenter">
+                <MudSelectItem Value="@((OrderStatus?)null)">Todos</MudSelectItem>
+                <MudSelectItem Value="@OrderStatus.Pending">Pendente</MudSelectItem>
+                <MudSelectItem Value="@OrderStatus.Confirmed">Confirmado</MudSelectItem>
+                <MudSelectItem Value="@OrderStatus.Preparing">Em Preparo</MudSelectItem>
+                <MudSelectItem Value="@OrderStatus.ReadyForDelivery">Pronto para Entrega</MudSelectItem>
+                <MudSelectItem Value="@OrderStatus.InTransit">A Caminho</MudSelectItem>
+                <MudSelectItem Value="@OrderStatus.Delivered">Entregue</MudSelectItem>
+                <MudSelectItem Value="@OrderStatus.Cancelled">Cancelado</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="4" Class="d-flex justify-end align-center">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Refresh"
+                       OnClick="RefreshOrders">
+                Atualizar
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+
+    @if (_isLoading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Class="mt-4" />
+    }
+    else if (_orders is null || !_orders.Any())
+    {
+        <MudAlert Severity="Severity.Info" Class="mt-4">
+            Nenhum pedido encontrado.
+        </MudAlert>
+    }
+    else
+    {
+        <MudTable Items="@_orders" Hover="true" Striped="true" Class="mt-4">
+            <HeaderContent>
+                <MudTh>Pedido</MudTh>
+                <MudTh>Cliente</MudTh>
+                <MudTh>Data</MudTh>
+                <MudTh>Total</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh>Itens</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Pedido">
+                    <MudText Typo="Typo.caption">@context.Id.ToString()[..8]</MudText>
+                </MudTd>
+                <MudTd DataLabel="Cliente">
+                    @(string.IsNullOrWhiteSpace(context.CustomerName) ? "Cliente não informado" : context.CustomerName)
+                </MudTd>
+                <MudTd DataLabel="Data">@context.OrderDate.ToString("dd/MM/yyyy HH:mm")</MudTd>
+                <MudTd DataLabel="Total">
+                    <MudText Color="Color.Success">@context.Total.ToString("C")</MudText>
+                </MudTd>
+                <MudTd DataLabel="Status">
+                    <MudChip T="string"
+                             Color="@GetStatusColor(context.Status)"
+                             Size="Size.Small"
+                             Variant="Variant.Outlined">
+                        @GetStatusName(context.Status)
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="Itens">
+                    <MudText Typo="Typo.caption">@context.Items.Count item(s)</MudText>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+</MudContainer>
+
+@code {
+    private List<Order>? _orders;
+    private DateTime? _filterDate;
+    private OrderStatus? _filterStatus;
+    private bool _isLoading = true;
+    private bool _hasLoaded = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_hasLoaded)
+        {
+            _hasLoaded = true;
+            await LoadOrders();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadOrders()
+    {
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            _orders = await OrderService.GetAllAsync();
+
+            if (_filterDate.HasValue)
+            {
+                _orders = _orders.Where(o => o.OrderDate.Date == _filterDate.Value.Date).ToList();
+            }
+
+            if (_filterStatus.HasValue)
+            {
+                _orders = _orders.Where(o => o.Status == _filterStatus.Value).ToList();
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Erro ao carregar pedidos: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async void OnFilterChanged(DateTime? value)
+    {
+        _filterDate = value;
+
+        await LoadOrders();
+        StateHasChanged();
+    }
+
+    private async void OnFilterChanged(OrderStatus? value)
+    {
+        _filterStatus = value;
+
+        await LoadOrders();
+        StateHasChanged();
+    }
+
+    private async Task RefreshOrders()
+    {
+        _filterDate = null;
+        _filterStatus = null;
+        await LoadOrders();
+        Snackbar.Add("Lista atualizada", Severity.Info);
+    }
+
+    private string GetStatusName(OrderStatus status) =>
+        status.GetDisplayName();
+
+    private Color GetStatusColor(OrderStatus status) => status switch
+    {
+        OrderStatus.Pending => Color.Warning,
+        OrderStatus.Confirmed or 
+        OrderStatus.Preparing or 
+        OrderStatus.ReadyForDelivery or
+        OrderStatus.InTransit => Color.Info,
+        OrderStatus.Delivered => Color.Success,
+        _ => Color.Default
+    };
+}
