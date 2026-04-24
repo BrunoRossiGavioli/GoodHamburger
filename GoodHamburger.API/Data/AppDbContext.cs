@@ -57,7 +57,7 @@ public class AppDbContext : IdentityDbContext<UserEntity, IdentityRole<Guid>, Gu
             entity.HasMany(e => e.Prices)
                 .WithOne(e => e.Product)
                 .HasForeignKey(e => e.ProductId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         builder.Entity<ProductPriceEntity>(entity =>
