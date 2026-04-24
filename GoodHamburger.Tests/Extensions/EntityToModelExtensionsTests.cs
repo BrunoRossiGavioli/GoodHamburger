@@ -106,7 +106,7 @@ public class EntityToModelExtensionsTests
             Subtotal = 9.50m,
             Discount = 0m,
             Total = 9.50m,
-            Status = OrderStatus.Pendente,
+            Status = OrderStatus.Pending,
             Items = []
         };
 
@@ -139,7 +139,7 @@ public class EntityToModelExtensionsTests
             CustomerAddress = "Rua C",
             OrderDate = orderDate,
             Subtotal = 2.00m, Discount = 0m, Total = 2.00m,
-            Status = OrderStatus.Pendente,
+            Status = OrderStatus.Pending,
             Items =
             [
                 new OrderItemEntity
@@ -177,7 +177,7 @@ public class EntityToModelExtensionsTests
             Customer = customer,
             OrderDate = DateTime.UtcNow,
             Subtotal = 5.00m, Discount = 0m, Total = 5.00m,
-            Status = OrderStatus.Confirmado,
+            Status = OrderStatus.Confirmed,
             Items = []
         };
 

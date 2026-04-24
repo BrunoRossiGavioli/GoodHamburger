@@ -119,9 +119,9 @@ public class OrderServiceTests
         _orderRepoMock.Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>())).ReturnsAsync(entity);
         _orderRepoMock.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
-        await _sut.UpdateStatus(new UpdateOrderStatusDto(id, OrderStatus.Confirmado));
+        await _sut.UpdateStatus(new UpdateOrderStatusDto(id, OrderStatus.Confirmed));
 
-        Assert.Equal(OrderStatus.Confirmado, entity.Status);
+        Assert.Equal(OrderStatus.Confirmed, entity.Status);
         _orderRepoMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -131,7 +131,7 @@ public class OrderServiceTests
         _orderRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync((OrderEntity?)null);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _sut.UpdateStatus(new UpdateOrderStatusDto(Guid.NewGuid(), OrderStatus.Cancelado)));
+            _sut.UpdateStatus(new UpdateOrderStatusDto(Guid.NewGuid(), OrderStatus.Cancelled)));
     }
 
     // ── CreateAsync — customer validation ─────────────────────────────────────
@@ -541,7 +541,7 @@ public class OrderServiceTests
         await _sut.CreateAsync(AnonymousDto((sandwich.Id, 1, 5.00m)));
 
         Assert.NotNull(capturedEntity);
-        Assert.Equal(OrderStatus.Pendente, capturedEntity!.Status);
+        Assert.Equal(OrderStatus.Pending, capturedEntity!.Status);
     }
 
     // ── Cliente cadastrado recebe desconto ────────────────────────────────────
@@ -598,7 +598,7 @@ public class OrderServiceTests
         Subtotal = 5.00m,
         Discount = 0m,
         Total = 5.00m,
-        Status = OrderStatus.Pendente,
+        Status = OrderStatus.Pending,
         Items = []
     };
 
