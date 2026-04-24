@@ -6,49 +6,53 @@
 <PageTitle>Login - Good Hamburger</PageTitle>
 
 <div class="login-container">
-    <MudCard>
+    <MudCard Style="min-width: 20dvw;">
         <MudCardContent>
             <h4 style="text-align: center; margin-bottom: 10px;">Good Hamburger</h4>
             <p style="text-align: center; margin-bottom: 20px; color: gray;">Sistema de Gerenciamento</p>
 
-            <MudTextField @bind-Value="email"
-                          Label="Email"
-                          Variant="Variant.Outlined"
-                          FullWidth="true"
-                          Margin="Margin.Normal"
-                          InputType="InputType.Email" />
+            <EditForm Model="this" OnValidSubmit="LoginAsync">
+                <MudTextField @bind-Value="email"
+                              Label="Email"
+                              Variant="Variant.Outlined"
+                              FullWidth="true"
+                              Margin="Margin.Normal"
+                              InputType="InputType.Email"
+                              Disabled="isLoading" />
 
-            <MudTextField @bind-Value="password"
-                          Label="Senha"
-                          Variant="Variant.Outlined"
-                          FullWidth="true"
-                          Margin="Margin.Normal"
-                          InputType="InputType.Password" />
+                <MudTextField @bind-Value="password"
+                              Label="Senha"
+                              Variant="Variant.Outlined"
+                              FullWidth="true"
+                              Margin="Margin.Normal"
+                              InputType="InputType.Password"
+                              Disabled="isLoading" />
 
-            @if (!string.IsNullOrEmpty(errorMessage))
-            {
-                <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Margin="Margin.Normal">
-                    @errorMessage
-                </MudAlert>
-            }
-
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       FullWidth="true"
-                       Size="Size.Large"
-                       OnClick="LoginAsync"
-                       Disabled="isLoading"
-                       Class="mt-4">
-                @if (isLoading)
+                @if (!string.IsNullOrEmpty(errorMessage))
                 {
-                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
-                    <span class="ms-2">Autenticando...</span>
+                    <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Margin="Margin.Normal">
+                        @errorMessage
+                    </MudAlert>
                 }
-                else
-                {
-                    <span>Entrar</span>
-                }
-            </MudButton>
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           FullWidth="true"
+                           Size="Size.Large"
+                           ButtonType="ButtonType.Submit"
+                           Disabled="isLoading"
+                           Class="mt-4">
+                    @if (isLoading)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                        <span class="ms-2">Autenticando...</span>
+                    }
+                    else
+                    {
+                        <span>Entrar</span>
+                    }
+                </MudButton>
+            </EditForm>
         </MudCardContent>
     </MudCard>
 </div>
