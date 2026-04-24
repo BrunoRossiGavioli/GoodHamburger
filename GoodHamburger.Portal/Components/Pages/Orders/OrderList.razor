@@ -2,6 +2,7 @@
 @attribute [Authorize(Roles = $"{Roles.Administrador},{Roles.Funcionario}")]
 
 @using GoodHamburger.Portal.Services.Orders
+@using GoodHamburger.Shared.DTOs.PurchaseOrders
 @using GoodHamburger.Shared.Models.PurchaseOrders
 @using GoodHamburger.Shared.Enums
 
@@ -20,7 +21,7 @@
                            Label="Filtrar por data"
                            Variant="Variant.Outlined"
                            Clearable="true"
-                           DateChanged="OnFilterChanged" />
+                           DateChanged="async value => await OnFilterChanged(value)" />
         </MudItem>
         <MudItem xs="12" sm="4">
             <MudSelect T="OrderStatus?"
@@ -28,14 +29,14 @@
                        Label="Filtrar por status"
                        Variant="Variant.Outlined"
                        Clearable="true"
-                       ValueChanged="OnFilterChanged"
+                       ValueChanged="async value => await OnFilterChanged(value)"
                        AnchorOrigin="Origin.BottomCenter">
                 <MudSelectItem Value="@((OrderStatus?)null)">Todos</MudSelectItem>
-                <MudSelectItem Value="@OrderStatus.Pending">Pendente</MudSelectItem>
-                <MudSelectItem Value="@OrderStatus.Preparing">Em Preparo</MudSelectItem>
-                <MudSelectItem Value="@OrderStatus.ReadyForDelivery">Pronto</MudSelectItem>
-                <MudSelectItem Value="@OrderStatus.Delivered">Entregue</MudSelectItem>
-                <MudSelectItem Value="@OrderStatus.Cancelled">Cancelado</MudSelectItem>
+                <MudSelectItem Value="@((OrderStatus?)OrderStatus.Pending)">Pendente</MudSelectItem>
+                <MudSelectItem Value="@((OrderStatus?)OrderStatus.Preparing)">Em Preparo</MudSelectItem>
+                <MudSelectItem Value="@((OrderStatus?)OrderStatus.ReadyForDelivery)">Pronto</MudSelectItem>
+                <MudSelectItem Value="@((OrderStatus?)OrderStatus.Delivered)">Entregue</MudSelectItem>
+                <MudSelectItem Value="@((OrderStatus?)OrderStatus.Cancelled)">Cancelado</MudSelectItem>
             </MudSelect>
         </MudItem>
         <MudItem xs="12" sm="4" Class="d-flex justify-end align-center">
@@ -68,6 +69,7 @@
                 <MudTh>Total</MudTh>
                 <MudTh>Status</MudTh>
                 <MudTh>Itens</MudTh>
+                <MudTh>Ações</MudTh> <!-- Nova coluna -->
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Pedido">
@@ -89,15 +91,30 @@
                     <MudText Color="Color.Success">@context.Total.ToString("C")</MudText>
                 </MudTd>
                 <MudTd DataLabel="Status">
-                    <MudChip T="string"
-                             Color="@GetStatusColor(context.Status)"
-                             Size="Size.Small"
-                             Variant="Variant.Outlined">
-                        @GetStatusName(context.Status)
-                    </MudChip>
+                    <MudSelect T="OrderStatus"
+                               Value="@context.Status"
+                               ValueChanged="@(v => UpdateOrderStatus(context.Id, v))"
+                               Variant="Variant.Outlined"
+                               Size="Size.Small"
+                               Margin="Margin.Dense"
+                               AnchorOrigin="Origin.BottomCenter">
+                        <MudSelectItem Value="@OrderStatus.Pending">Pendente</MudSelectItem>
+                        <MudSelectItem Value="@OrderStatus.Confirmed">Confirmado</MudSelectItem>
+                        <MudSelectItem Value="@OrderStatus.Preparing">Em Preparo</MudSelectItem>
+                        <MudSelectItem Value="@OrderStatus.ReadyForDelivery">Pronto</MudSelectItem>
+                        <MudSelectItem Value="@OrderStatus.InTransit">Em Trânsito</MudSelectItem>
+                        <MudSelectItem Value="@OrderStatus.Delivered">Entregue</MudSelectItem>
+                        <MudSelectItem Value="@OrderStatus.Cancelled">Cancelado</MudSelectItem>
+                    </MudSelect>
                 </MudTd>
                 <MudTd DataLabel="Itens">
                     <MudText Typo="Typo.caption">@context.Items.Count item(s)</MudText>
+                </MudTd>
+                <MudTd DataLabel="Ações">
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                                   Color="Color.Info"
+                                   OnClick="@(() => NavigateToOrder(context.Id))"
+                                   Title="Visualizar" />
                 </MudTd>
             </RowTemplate>
         </MudTable>
@@ -151,7 +168,7 @@
         }
     }
 
-    private async void OnFilterChanged(DateTime? value)
+    private async Task OnFilterChanged(DateTime? value)
     {
         _filterDate = value;
 
@@ -159,7 +176,7 @@
         StateHasChanged();
     }
 
-    private async void OnFilterChanged(OrderStatus? value)
+    private async Task OnFilterChanged(OrderStatus? value)
     {
         _filterStatus = value;
 
@@ -174,6 +191,23 @@
         await LoadOrders();
         Snackbar.Add("Lista atualizada", Severity.Info);
     }
+
+    private async Task UpdateOrderStatus(Guid orderId, OrderStatus newStatus)
+    {
+        try
+        {
+            await OrderService.UpdateStatusAsync(new UpdateOrderStatusDto(orderId, newStatus));
+            Snackbar.Add($"Pedido {orderId.ToString()[..8]} atualizado para {newStatus.GetDisplayName()}", Severity.Success);
+            await LoadOrders();
+            StateHasChanged();
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Erro ao atualizar status: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void NavigateToOrder(Guid id) => Navigation.NavigateTo($"/orders/view/{id}");
 
     private string GetStatusName(OrderStatus status) =>
         status.GetDisplayName();

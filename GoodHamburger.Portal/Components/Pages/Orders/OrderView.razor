@@ -1,0 +1,286 @@
+﻿@page "/orders/view/{Id:guid}"
+@attribute [Authorize(Roles = $"{Roles.Administrador},{Roles.Funcionario}")]
+
+@using GoodHamburger.Portal.Services.Orders
+@using GoodHamburger.Shared.Models.PurchaseOrders
+@using GoodHamburger.Shared.Enums
+@using GoodHamburger.Shared.DTOs.PurchaseOrders
+
+@inject OrderService OrderService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<PageTitle>Pedido - Good Hamburger</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    @if (_isLoading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Class="mt-4" />
+    }
+    else if (_order is null)
+    {
+        <MudAlert Severity="Severity.Error" Class="mt-4">
+            Pedido não encontrado.
+        </MudAlert>
+        <MudButton Variant="Variant.Outlined"
+                   StartIcon="@Icons.Material.Filled.ArrowBack"
+                   OnClick="GoBack"
+                   Class="mt-4">
+            Voltar para lista
+        </MudButton>
+    }
+    else
+    {
+        <MudText Typo="Typo.h4" Class="mb-2">Pedido #@_order.Id.ToString()[..8]</MudText>
+
+        <MudCard Class="mb-4">
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" sm="4">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Data</MudText>
+                        <MudText Typo="Typo.body1">@_order.OrderDate.ToString("dd/MM/yyyy HH:mm")</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Status</MudText>
+                        <MudChip T="string"
+                                 Color="@GetStatusColor(_order.Status)"
+                                 Size="Size.Small"
+                                 Variant="Variant.Outlined">
+                            @GetStatusName(_order.Status)
+                        </MudChip>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Total</MudText>
+                        <MudText Typo="Typo.h6" Color="Color.Primary">@_order.Total.ToString("C")</MudText>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+        </MudCard>
+
+        <!-- Atualizar Status -->
+        <MudCard Class="mb-4">
+            <MudCardContent>
+                <MudText Typo="Typo.h6" Class="mb-3">Atualizar Status</MudText>
+                <MudGrid>
+                    <MudItem xs="12" sm="8">
+                        <MudSelect T="OrderStatus"
+                                   Value="@_newStatus"
+                                   ValueChanged="OnStatusChanged"
+                                   Label="Novo status"
+                                   Variant="Variant.Outlined"
+                                   AnchorOrigin="Origin.BottomCenter">
+                            <MudSelectItem Value="@OrderStatus.Pending">Pendente</MudSelectItem>
+                            <MudSelectItem Value="@OrderStatus.Confirmed">Confirmado</MudSelectItem>
+                            <MudSelectItem Value="@OrderStatus.Preparing">Em Preparo</MudSelectItem>
+                            <MudSelectItem Value="@OrderStatus.ReadyForDelivery">Pronto para Entrega</MudSelectItem>
+                            <MudSelectItem Value="@OrderStatus.InTransit">Em Trânsito</MudSelectItem>
+                            <MudSelectItem Value="@OrderStatus.Delivered">Entregue</MudSelectItem>
+                            <MudSelectItem Value="@OrderStatus.Cancelled">Cancelado</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="4" Class="d-flex align-end">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Save"
+                                   OnClick="UpdateStatusAsync"
+                                   Disabled="@(_newStatus == _order.Status || _isUpdating)"
+                                   FullWidth="true">
+                            @(_isUpdating ? "Atualizando..." : "Atualizar")
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+        </MudCard>
+
+        <!-- Cliente -->
+        <MudCard Class="mb-4">
+            <MudCardContent>
+                <MudText Typo="Typo.h6" Class="mb-3">Cliente</MudText>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Nome</MudText>
+                        <MudText Typo="Typo.body1">@_order.CustomerName</MudText>
+                    </MudItem>
+                    @if (!string.IsNullOrEmpty(_order.CustomerPhone))
+                    {
+                        <MudItem xs="12" sm="6">
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Telefone</MudText>
+                            <MudText Typo="Typo.body1">@_order.CustomerPhone</MudText>
+                        </MudItem>
+                    }
+                    @if (!string.IsNullOrEmpty(_order.CustomerAddress))
+                    {
+                        <MudItem xs="12">
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Endereço</MudText>
+                            <MudText Typo="Typo.body1">@_order.CustomerAddress</MudText>
+                        </MudItem>
+                    }
+                    @if (_order.CustomerId.HasValue)
+                    {
+                        <MudItem xs="12" Class="mt-2">
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Info">
+                                Cliente Cadastrado
+                            </MudChip>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudCardContent>
+        </MudCard>
+
+        <!-- Itens do Pedido -->
+        <MudCard Class="mb-4">
+            <MudCardContent>
+                <MudText Typo="Typo.h6" Class="mb-3">Itens do Pedido</MudText>
+                <MudTable Items="@_order.Items.ToList()" Hover="true" Striped="true">
+                    <HeaderContent>
+                        <MudTh>Produto</MudTh>
+                        <MudTh>Tipo</MudTh>
+                        <MudTh>Preço Unit.</MudTh>
+                        <MudTh>Qtd</MudTh>
+                        <MudTh>Subtotal</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Produto">@context.Product.Name</MudTd>
+                        <MudTd DataLabel="Tipo">@context.Product.Type.GetDisplayName()</MudTd>
+                        <MudTd DataLabel="Preço Unit.">@context.Product.Price.ToString("C")</MudTd>
+                        <MudTd DataLabel="Qtd">@context.Quantity</MudTd>
+                        <MudTd DataLabel="Subtotal">@((context.Product.Price * context.Quantity).ToString("C"))</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudCardContent>
+        </MudCard>
+
+        <!-- Totais -->
+        <MudCard Class="mb-4">
+            <MudCardContent>
+                <MudText Typo="Typo.h6" Class="mb-3">Resumo Financeiro</MudText>
+                <MudGrid>
+                    <MudItem xs="6">
+                        <MudText Typo="Typo.body2">Subtotal</MudText>
+                    </MudItem>
+                    <MudItem xs="6" Class="text-right">
+                        <MudText Typo="Typo.body1">@_order.Subtotal.ToString("C")</MudText>
+                    </MudItem>
+
+                    @if (_order.Discount > 0)
+                    {
+                        <MudItem xs="6">
+                            <MudText Typo="Typo.body2" Color="Color.Success">Desconto</MudText>
+                        </MudItem>
+                        <MudItem xs="6" Class="text-right">
+                            <MudText Typo="Typo.body1" Color="Color.Success">-@_order.Discount.ToString("C")</MudText>
+                        </MudItem>
+                    }
+
+                    <MudDivider Class="my-2" Style="grid-column: 1 / -1;" />
+
+                    <MudItem xs="6">
+                        <MudText Typo="Typo.h6">Total</MudText>
+                    </MudItem>
+                    <MudItem xs="6" Class="text-right">
+                        <MudText Typo="Typo.h6" Color="Color.Primary">@_order.Total.ToString("C")</MudText>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+        </MudCard>
+
+        <MudGrid Class="mb-4">
+            <MudItem xs="12">
+                <MudButton Variant="Variant.Outlined"
+                           StartIcon="@Icons.Material.Filled.ArrowBack"
+                           OnClick="GoBack"
+                           FullWidth="true">
+                    Voltar para Lista de Pedidos
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    }
+</MudContainer>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private Order? _order;
+    private OrderStatus _newStatus;
+    private bool _isLoading = true;
+    private bool _isUpdating;
+    private bool _hasLoaded = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_hasLoaded)
+        {
+            _hasLoaded = true;
+            await LoadOrder();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadOrder()
+    {
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            _order = await OrderService.GetByIdAsync(Id);
+            _newStatus = _order?.Status ?? OrderStatus.Pending;
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Erro ao carregar pedido: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task UpdateStatusAsync()
+    {
+        if (_order is null || _newStatus == _order.Status)
+            return;
+
+        try
+        {
+            _isUpdating = true;
+            StateHasChanged();
+
+            await OrderService.UpdateStatusAsync(new UpdateOrderStatusDto(_order.Id, _newStatus));
+            
+            // Atualiza o pedido localmente para refletir a mudança
+            _order = await OrderService.GetByIdAsync(Id);
+            
+            Snackbar.Add($"Status atualizado para {GetStatusName(_newStatus)}", Severity.Success);
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Erro ao atualizar status: {ex.Message}", Severity.Error);
+            _newStatus = _order?.Status ?? OrderStatus.Pending;
+        }
+        finally
+        {
+            _isUpdating = false;
+            StateHasChanged();
+        }
+    }
+
+    private void OnStatusChanged(OrderStatus value)
+    {
+        _newStatus = value;
+    }
+
+    private void GoBack() => Navigation.NavigateTo("/orders");
+
+    private string GetStatusName(OrderStatus status) => status.GetDisplayName();
+
+    private Color GetStatusColor(OrderStatus status) => status switch
+    {
+        OrderStatus.Pending => Color.Warning,
+        OrderStatus.Confirmed or OrderStatus.Preparing or OrderStatus.ReadyForDelivery or OrderStatus.InTransit => Color.Info,
+        OrderStatus.Delivered => Color.Success,
+        OrderStatus.Cancelled => Color.Error,
+        _ => Color.Default
+    };
+}
