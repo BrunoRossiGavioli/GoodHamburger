@@ -16,17 +16,17 @@ namespace GoodHamburger.API.Repositories.PurchaseOrders
 
         public async Task<OrderEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _context.Orders.Where(o => o.Id == id).Include(o => o.Customer).Include(o => o.Items).FirstOrDefaultAsync(cancellationToken);
+            return await _context.Orders.Where(o => o.Id == id).Include(o => o.Customer).Include(o => o.Items).ThenInclude(i => i.Product).ThenInclude(p => p.Prices).FirstOrDefaultAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<OrderEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await _context.Orders.Include(o => o.Customer).Include(o => o.Items).ToListAsync(cancellationToken);
+            return await _context.Orders.Include(o => o.Customer).Include(o => o.Items).ThenInclude(i => i.Product).ThenInclude(p => p.Prices).ToListAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<OrderEntity>> FindAsync(Expression<Func<OrderEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            return await _context.Orders.Where(predicate).Include(o => o.Customer).Include(o => o.Items).ToListAsync(cancellationToken);
+            return await _context.Orders.Where(predicate).Include(o => o.Customer).Include(o => o.Items).ThenInclude(i => i.Product).ThenInclude(p => p.Prices).ToListAsync(cancellationToken);
         }
 
         public async Task<OrderEntity> AddAsync(OrderEntity entity, CancellationToken cancellationToken = default)
