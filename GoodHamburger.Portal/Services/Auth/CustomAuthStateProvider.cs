@@ -3,7 +3,7 @@ using Microsoft.JSInterop;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace GoodHamburger.Portal.Services;
+namespace GoodHamburger.Portal.Services.Auth;
 
 public class CustomAuthStateProvider : AuthenticationStateProvider, IAsyncDisposable
 {

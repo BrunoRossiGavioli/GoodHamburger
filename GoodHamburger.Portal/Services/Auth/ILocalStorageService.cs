@@ -1,4 +1,4 @@
-namespace GoodHamburger.Portal.Services;
+namespace GoodHamburger.Portal.Services.Auth;
 
 public interface ILocalStorageService
 {

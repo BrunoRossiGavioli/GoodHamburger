@@ -1,5 +1,5 @@
 using GoodHamburger.Portal.Components;
-using GoodHamburger.Portal.Services;
+using GoodHamburger.Portal.Services.Auth;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using MudBlazor.Services;

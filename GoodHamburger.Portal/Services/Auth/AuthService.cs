@@ -1,7 +1,7 @@
 using GoodHamburger.Shared.DTOs.Auth;
 using System.Text.Json.Serialization;
 
-namespace GoodHamburger.Portal.Services;
+namespace GoodHamburger.Portal.Services.Auth;
 
 public class AuthService
 {

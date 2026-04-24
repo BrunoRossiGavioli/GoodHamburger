@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
-namespace GoodHamburger.Portal.Services;
+namespace GoodHamburger.Portal.Services.Auth;
 
 // Usa ProtectedLocalStorage (compartilhado entre abas do mesmo domínio)
 // em vez de ProtectedSessionStorage (isolado por aba/circuito).
