@@ -49,7 +49,7 @@ namespace GoodHamburger.API.Repositories.PurchaseOrders
 
         public async Task<bool> ExistsAsync(Expression<Func<OrderItemEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            return await _context.OrderItems.AnyAsync(predicate));
+            return await _context.OrderItems.AnyAsync(predicate, cancellationToken: cancellationToken);
         }
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

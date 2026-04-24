@@ -21,12 +21,12 @@ namespace GoodHamburger.API.Repositories.PurchaseOrders
 
         public async Task<IEnumerable<OrderEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await _context.Orders.Include(o => o.Customer).Include(o => o.Items).ThenInclude(i => i.Product).ThenInclude(p => p.Prices).ToListAsync(cancellationToken);
+            return await _context.Orders.Include(o => o.Customer).Include(o => o.Items).ThenInclude(i => i.Product).ThenInclude(p => p.Prices).OrderByDescending(p => p.OrderDate).ToListAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<OrderEntity>> FindAsync(Expression<Func<OrderEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            return await _context.Orders.Where(predicate).Include(o => o.Customer).Include(o => o.Items).ThenInclude(i => i.Product).ThenInclude(p => p.Prices).ToListAsync(cancellationToken);
+            return await _context.Orders.Where(predicate).Include(o => o.Customer).Include(o => o.Items).ThenInclude(i => i.Product).ThenInclude(p => p.Prices).OrderByDescending(p => p.OrderDate).ToListAsync(cancellationToken);
         }
 
         public async Task<OrderEntity> AddAsync(OrderEntity entity, CancellationToken cancellationToken = default)

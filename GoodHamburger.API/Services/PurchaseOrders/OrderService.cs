@@ -25,7 +25,7 @@ public class OrderService : IOrderService
 
     public async Task<IEnumerable<Order>> FindAsync(FindOrderDto dto)
     {
-        if(dto.CustomerId is null && dto.OrderDate is null)
+        if (dto.CustomerId is null && dto.OrderDate is null)
             return await GetAllAsync();
 
         var orders = await _orderRepository.FindAsync(e =>
@@ -63,6 +63,12 @@ public class OrderService : IOrderService
             orderEntity.CustomerPhone = dto.CustomerPhone.Trim();
             orderEntity.CustomerAddress = dto.CustomerAddress.Trim();
         }
+
+        if (string.IsNullOrWhiteSpace(orderEntity.CustomerName))
+            orderEntity.CustomerName = dto.CustomerId.HasValue ? string.Empty : "Balcão";
+
+        orderEntity.CustomerPhone ??= string.Empty;
+        orderEntity.CustomerAddress ??= string.Empty;
 
         // Load and validate products
         var productIds = dto.items.Select(i => i.ProductId).ToList();
