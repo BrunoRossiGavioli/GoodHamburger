@@ -21,12 +21,12 @@ namespace GoodHamburger.API.Repositories.PurchaseOrders
 
         public async Task<IEnumerable<OrderItemEntity>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await _context.OrderItems.Include(oi => oi.Order).Include(oi => oi.Product).ToListAsync(cancellationToken);
+            return await _context.OrderItems.Include(oi => oi.Order).Include(oi => oi.Product).ThenInclude(p => p.Prices).ToListAsync(cancellationToken);
         }
 
         public async Task<IEnumerable<OrderItemEntity>> FindAsync(Expression<Func<OrderItemEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            return await _context.OrderItems.Where(predicate).Include(oi => oi.Order).Include(oi => oi.Product).ToListAsync(cancellationToken);
+            return await _context.OrderItems.Where(predicate).Include(oi => oi.Order).Include(oi => oi.Product).ThenInclude(p => p.Prices).ToListAsync(cancellationToken);
         }
 
         public async Task<OrderItemEntity> AddAsync(OrderItemEntity entity, CancellationToken cancellationToken = default)
@@ -47,9 +47,9 @@ namespace GoodHamburger.API.Repositories.PurchaseOrders
             return Task.CompletedTask;
         }
 
-        public Task<bool> ExistsAsync(Expression<Func<OrderItemEntity, bool>> predicate, CancellationToken cancellationToken = default)
+        public async Task<bool> ExistsAsync(Expression<Func<OrderItemEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(_context.OrderItems.Any(predicate));
+            return await _context.OrderItems.AnyAsync(predicate));
         }
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
