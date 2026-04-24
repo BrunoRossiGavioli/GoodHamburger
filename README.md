@@ -131,6 +131,43 @@ Ao avaliar melhor, percebi que nenhuma das subclasses adicionaria campos extras 
 
 ---
 
+## Testes na API
+
+**Stack de testes:**
+- **xUnit** para framework de testes
+- **Moq** para mocks de repositórios e dependências
+- **Coverlet** para análise de cobertura de código
+
+**Abordagem adotada:**  
+Testes unitários focados em Services, Repositories e Extension Methods, isolando completamente a lógica de negócio usando mocks. Cada teste segue o padrão **AAA (Arrange, Act, Assert)**.
+
+**Áreas cobertas:**
+
+✅ **OrderService** (principais cenários):
+- Validação de guardas (null checks)
+- Recuperação e listagem de pedidos (GetAsync, GetAllAsync, FindAsync)
+- Atualização de status
+- Validação de cliente e produtos na criação
+- Aplicação de descontos por combinação de produtos (15% sandwich+drink, 20% sandwich+drink+fries)
+- Regras de negócio (apenas 1 sandwich, apenas 1 drink, não duplicatas por tipo)
+
+✅ **ProductService, CustomerService, ProductPriceService**:
+- Operações CRUD básicas
+- Validações de entrada
+
+✅ **Extension Methods e Mappings**:
+- Conversão de entidades para modelos
+
+**Limitações identificadas (faltando cobertura):**
+
+- Testes de exceção específicos: Alguns cenários de erro não têm testes explícitos para a exceção esperada
+- Cenários de concorrência: Testes com múltiplas threads acessando o mesmo recurso
+- Transações e rollback: Validação de comportamento em caso de falha na persistência
+- Testes de integração: Sem banco de dados real (tudo é mockado)
+- Validação de múltiplos cenários de descontos: Apenas combinações "felizes" são testadas
+
+---
+
 ## Decisões técnicas - Portal em Blazor
 
 ### Escolha do tipo de renderização
