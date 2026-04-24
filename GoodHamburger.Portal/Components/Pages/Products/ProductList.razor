@@ -1,0 +1,167 @@
+﻿@page "/products"
+@attribute [Authorize(Roles = "Administrador,Funcionario")]
+
+@using GoodHamburger.Portal.Services.Products
+@using GoodHamburger.Shared.Extensions
+@using GoodHamburger.Shared.Models.Products
+@using GoodHamburger.Shared.Enums
+
+@inject ProductService ProductService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<PageTitle>Produtos - Good Hamburger</PageTitle>
+
+<MudContainer>
+    <MudText Typo="Typo.h4" Class="mb-4">Produtos</MudText>
+    
+    <MudGrid Class="mb-4">
+        <MudItem xs="12" sm="8">
+            <MudTextField @bind-Value="_searchTerm"
+                          Label="Buscar por nome"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          OnKeyUp="HandleSearchKeyUp"
+                          Immediate="true" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <AuthorizeView Roles="Administrador">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="NavigateToCreate"
+                           FullWidth="true">
+                    Novo Produto
+                </MudButton>
+            </AuthorizeView>
+        </MudItem>
+    </MudGrid>
+
+    @if (_isLoading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Class="mt-4" />
+    }
+    else if (_products is null || !_products.Any())
+    {
+        <MudAlert Severity="Severity.Info" Class="mt-4">
+            Nenhum produto encontrado.
+        </MudAlert>
+    }
+    else
+    {
+        <MudTable Items="@_products" Hover="true" Striped="true" Class="mt-4">
+            <HeaderContent>
+                <MudTh>Nome</MudTh>
+                <MudTh>Tipo</MudTh>
+                <MudTh>Preço</MudTh>
+                <MudTh>Ações</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Nome">@context.Name</MudTd>
+                <MudTd DataLabel="Tipo">
+                    <MudChip T="string"
+                             Color="@GetTypeColor(context.Type)"
+                             Size="Size.Small"
+                             Variant="Variant.Outlined">
+                        @GetTypeName(context.Type)
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="Preço">@context.Price.ToString("C")</MudTd>
+                <MudTd DataLabel="Ações">
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                                   Color="Color.Info"
+                                   OnClick="@(() => NavigateToView(context.Id))"
+                                   Title="Visualizar" />
+                    <AuthorizeView Roles="Administrador" Context="authContext">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Warning"
+                                       OnClick="@(() => NavigateToEdit(context.Id))"
+                                       Title="Editar" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       OnClick="@(() => ConfirmDelete(context))"
+                                       Title="Excluir" />
+                    </AuthorizeView>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+</MudContainer>
+
+@code {
+    private List<Product>? _products;
+    private string _searchTerm = string.Empty;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProducts();
+    }
+
+    private async Task LoadProducts()
+    {
+        try
+        {
+            _isLoading = true;
+            _products = string.IsNullOrWhiteSpace(_searchTerm)
+                ? await ProductService.GetAllAsync()
+                : await ProductService.FindAsync(name: _searchTerm);
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Erro ao carregar produtos: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task HandleSearchKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await LoadProducts();
+        }
+    }
+
+    private void NavigateToCreate() => Navigation.NavigateTo("/products/create");
+    private void NavigateToEdit(Guid id) => Navigation.NavigateTo($"/products/edit/{id}");
+    private void NavigateToView(Guid id) => Navigation.NavigateTo($"/products/view/{id}");
+
+    private async Task ConfirmDelete(Product product)
+    {
+        var parameters = new DialogParameters { ["ContentText"] = $"Deseja realmente excluir o produto {product.Name}?" };
+        var dialog = await DialogService.ShowMessageBoxAsync("Excluir Produto",
+            (string)parameters["ContentText"],
+            yesText: "Excluir",
+            cancelText: "Cancelar");
+
+        if (dialog == true)
+        {
+            try
+            {
+                await ProductService.DeleteAsync(product.Id);
+                Snackbar.Add("Produto excluído com sucesso!", Severity.Success);
+                await LoadProducts();
+            }
+            catch (HttpRequestException ex)
+            {
+                Snackbar.Add($"Erro ao excluir produto: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private string GetTypeName(ProductType type)
+        => type.GetDisplayName();
+
+    private Color GetTypeColor(ProductType type) => type switch
+    {
+        ProductType.Sandwich => Color.Success,
+        ProductType.Drink => Color.Info,
+        ProductType.Fries => Color.Warning,
+        _ => Color.Default
+    };
+}

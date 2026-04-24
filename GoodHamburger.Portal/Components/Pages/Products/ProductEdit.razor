@@ -1,0 +1,131 @@
+﻿@page "/products/edit/{Id:guid}"
+@attribute [Authorize(Roles = "Administrador")]
+
+@using GoodHamburger.Portal.Services.Products
+@using GoodHamburger.Shared.DTOs.Products
+@using GoodHamburger.Shared.Models.Products
+@using System.ComponentModel.DataAnnotations
+
+@inject ProductService ProductService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<PageTitle>Editar Produto - Good Hamburger</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudText Typo="Typo.h4" Class="mb-4">Editar Produto</MudText>
+
+    @if (_isLoading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Class="mt-4" />
+    }
+    else if (_product is null)
+    {
+        <MudAlert Severity="Severity.Error">Produto não encontrado.</MudAlert>
+    }
+    else
+    {
+        <MudCard>
+            <MudCardContent>
+                <EditForm Model="@_model" OnValidSubmit="UpdateAsync">
+                    <DataAnnotationsValidator />
+                    
+                    <MudGrid>
+                        <MudItem xs="12">
+                            <MudTextField @bind-Value="_model.Name"
+                                          Label="Nome"
+                                          Required="true"
+                                          For="@(() => _model.Name)" />
+                            <ValidationMessage For="@(() => _model.Name)" />
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudTextField @bind-Value="_model.Description"
+                                          Label="Descrição"
+                                          Lines="3"
+                                          Required="true"
+                                          For="@(() => _model.Description)" />
+                            <ValidationMessage For="@(() => _model.Description)" />
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudGrid Class="mt-4">
+                        <MudItem xs="6">
+                            <MudButton Variant="Variant.Outlined"
+                                       StartIcon="@Icons.Material.Filled.ArrowBack"
+                                       OnClick="GoBack"
+                                       FullWidth="true">
+                                Voltar
+                            </MudButton>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Save"
+                                       ButtonType="ButtonType.Submit"
+                                       FullWidth="true">
+                                Atualizar
+                            </MudButton>
+                        </MudItem>
+                    </MudGrid>
+                </EditForm>
+            </MudCardContent>
+        </MudCard>
+    }
+</MudContainer>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private ProductEditModel _model = new();
+    private Product? _product;
+    private bool _isLoading = true;
+
+    private class ProductEditModel
+    {
+        [Required(ErrorMessage = "O nome é obrigatório")]
+        [StringLength(100)]
+        public string Name { get; set; } = "";
+
+        [Required(ErrorMessage = "A descrição é obrigatória")]
+        [StringLength(500)]
+        public string Description { get; set; } = "";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _product = await ProductService.GetByIdAsync(Id);
+            _model = new ProductEditModel
+            {
+                Name = _product.Name,
+                Description = _product.Description
+            };
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Erro ao carregar produto: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void GoBack() => Navigation.NavigateTo("/products");
+
+    private async Task UpdateAsync()
+    {
+        try
+        {
+            var dto = new UpdateProductDto(Id, _model.Name, _model.Description);
+            await ProductService.UpdateAsync(dto);
+            Snackbar.Add("Produto atualizado com sucesso!", Severity.Success);
+            Navigation.NavigateTo("/products");
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Erro ao atualizar produto: {ex.Message}", Severity.Error);
+        }
+    }
+}

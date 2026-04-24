@@ -1,0 +1,108 @@
+﻿@page "/products/view/{Id:guid}"
+@attribute [Authorize(Roles = "Administrador,Funcionario")]
+
+@using GoodHamburger.Portal.Services.Products
+@using GoodHamburger.Shared.Extensions
+@using GoodHamburger.Shared.Models.Products
+@using GoodHamburger.Shared.Enums
+
+@inject ProductService ProductService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<PageTitle>Visualizar Produto - Good Hamburger</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    @if (_isLoading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Class="mt-4" />
+    }
+    else if (_product is null)
+    {
+        <MudAlert Severity="Severity.Error">Produto não encontrado.</MudAlert>
+    }
+    else
+    {
+        <MudText Typo="Typo.h4" Class="mb-4">@_product.Name</MudText>
+
+        <MudCard>
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" sm="4">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Tipo</MudText>
+                        <MudChip T="string" 
+                                 Color="@GetTypeColor(_product.Type)"
+                                 Size="Size.Small"
+                                 Variant="Variant.Outlined">
+                            @GetTypeName(_product.Type)
+                        </MudChip>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Preço</MudText>
+                        <MudText Typo="Typo.body1" Color="Color.Success">@_product.Price.ToString("C")</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">ID</MudText>
+                        <MudText Typo="Typo.caption">@_product.Id</MudText>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Descrição</MudText>
+                        <MudText Typo="Typo.body1">@_product.Description</MudText>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Outlined"
+                           StartIcon="@Icons.Material.Filled.ArrowBack"
+                           OnClick="GoBack">
+                    Voltar
+                </MudButton>
+                <AuthorizeView Roles="Administrador">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Edit"
+                               OnClick="NavigateToEdit">
+                        Editar
+                    </MudButton>
+                </AuthorizeView>
+            </MudCardActions>
+        </MudCard>
+    }
+</MudContainer>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private Product? _product;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _product = await ProductService.GetByIdAsync(Id);
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Erro ao carregar produto: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void GoBack() => Navigation.NavigateTo("/products");
+    private void NavigateToEdit() => Navigation.NavigateTo($"/products/edit/{Id}");
+
+    private string GetTypeName(ProductType type)
+    => type.GetDisplayName();
+
+    private Color GetTypeColor(ProductType type) => type switch
+    {
+        ProductType.Sandwich => Color.Success,
+        ProductType.Drink => Color.Info,
+        ProductType.Fries => Color.Warning,
+        _ => Color.Default
+    };
+}
