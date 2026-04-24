@@ -57,8 +57,11 @@ public class ProductService
     /// </summary>
     /// <param name="id">ID do produto.</param>
     /// <exception cref="HttpRequestException">400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found.</exception>
-    public Task DeleteAsync(Guid id) =>
-        _http.DeleteAsync($"api/products/{id}");
+    public async Task DeleteAsync(Guid id)
+    {
+        var response = await _http.DeleteAsync($"api/products/{id}");
+        response.EnsureSuccessStatusCode();
+    }
 
     /// <summary>
     /// Busca produtos pelo nome.
