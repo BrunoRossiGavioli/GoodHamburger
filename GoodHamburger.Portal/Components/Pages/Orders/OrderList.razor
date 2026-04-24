@@ -32,10 +32,8 @@
                        AnchorOrigin="Origin.BottomCenter">
                 <MudSelectItem Value="@((OrderStatus?)null)">Todos</MudSelectItem>
                 <MudSelectItem Value="@OrderStatus.Pending">Pendente</MudSelectItem>
-                <MudSelectItem Value="@OrderStatus.Confirmed">Confirmado</MudSelectItem>
                 <MudSelectItem Value="@OrderStatus.Preparing">Em Preparo</MudSelectItem>
-                <MudSelectItem Value="@OrderStatus.ReadyForDelivery">Pronto para Entrega</MudSelectItem>
-                <MudSelectItem Value="@OrderStatus.InTransit">A Caminho</MudSelectItem>
+                <MudSelectItem Value="@OrderStatus.ReadyForDelivery">Pronto</MudSelectItem>
                 <MudSelectItem Value="@OrderStatus.Delivered">Entregue</MudSelectItem>
                 <MudSelectItem Value="@OrderStatus.Cancelled">Cancelado</MudSelectItem>
             </MudSelect>
@@ -76,7 +74,15 @@
                     <MudText Typo="Typo.caption">@context.Id.ToString()[..8]</MudText>
                 </MudTd>
                 <MudTd DataLabel="Cliente">
-                    @(string.IsNullOrWhiteSpace(context.CustomerName) ? "Cliente não informado" : context.CustomerName)
+                    <MudText Typo="Typo.body2">@context.CustomerName</MudText>
+                    @if (!string.IsNullOrEmpty(context.CustomerPhone))
+                    {
+                        <MudText Typo="Typo.caption">@context.CustomerPhone</MudText>
+                    }
+                    @if (context.CustomerId.HasValue)
+                    {
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Info">Cadastrado</MudChip>
+                    }
                 </MudTd>
                 <MudTd DataLabel="Data">@context.OrderDate.ToString("dd/MM/yyyy HH:mm")</MudTd>
                 <MudTd DataLabel="Total">
@@ -175,8 +181,8 @@
     private Color GetStatusColor(OrderStatus status) => status switch
     {
         OrderStatus.Pending => Color.Warning,
-        OrderStatus.Confirmed or 
-        OrderStatus.Preparing or 
+        OrderStatus.Confirmed or
+        OrderStatus.Preparing or
         OrderStatus.ReadyForDelivery or
         OrderStatus.InTransit => Color.Info,
         OrderStatus.Delivered => Color.Success,
