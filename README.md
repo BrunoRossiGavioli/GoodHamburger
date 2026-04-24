@@ -50,7 +50,7 @@ Ao avaliar melhor, percebi que nenhuma das subclasses adicionaria campos extras 
 
 ---
 
-### 4. Autenticação com Identity (Duende)
+### 4. Autenticação com Identity
 
 **Decisão:** Utilizar o ASP.NET Core Identity para gerenciar autenticação e autorização.
 
@@ -60,7 +60,7 @@ Ao avaliar melhor, percebi que nenhuma das subclasses adicionaria campos extras 
   - Validação de senha e e-mail  
   - Recuperação de senha, confirmação de e-mail, etc.  
 - Adicionar segurança de forma consistente e confiável.  
-- Não investir tempo reinventando a roda em um sistema bem consolidado (Identity da Duende).
+- Não investir tempo reinventando a roda em um sistema bem consolidado.
 
 ---
 
@@ -98,9 +98,9 @@ Ao avaliar melhor, percebi que nenhuma das subclasses adicionaria campos extras 
 
 > *"YAGNI (You Ain't Gonna Need It) aplicado para respostas, mas não para requisições."*
 
-<br/>
+---
 
-### Resumo dos Trade-offs Assumidos
+### Resumo dos Trade-offs Assumidos (API)
 
 | Decisão | Trade-off assumido |
 |---------|--------------------|
@@ -110,33 +110,112 @@ Ao avaliar melhor, percebi que nenhuma das subclasses adicionaria campos extras 
 
 ---
 
-## Definições técnicas - Portal em Blazor
+## Decisões técnicas - Portal em Blazor
 
-Criei um projeto Blazor App com renderização em Server, escolhi a versão server pois o WebAssembly demora um pouco na primeira inicialização e tem foco em aplicações que podem rodar por pequenos e médios periodos offline, o que não é o caso do portal da GoodHamburger.
+### Escolha do tipo de renderização
 
-Escolhi o MudBlazor pois é um dos pacotes de componentes gratituidos dos quais eu já tive previa experiência, e tem uma boa quantidade de componentes para o que eu ia precisar no portal.
+**Decisão:** Blazor Server (em vez de Blazor WebAssembly).
 
-Havia estruturado anteriormente que eu gostaria de para o MVP do portal ter o seguinte:
-- autenticação e autorização, consumindo da API
-- A página principal do portal seria o painel de gerar pedido.
-- Ter os cadastros auxiliares de cliente e produto, para dar um ar de aplicação mais realista
-	-Obs.: Não tive tempo para implementar no cadastro de produto a parte de versionamento de valores, a estrutura existe na API
-- Ter página para listagem de pedidos e também detalhamento
-- Alterar o status do pedido
-	-Não defini nenhum workflow específico para isso, então optei por permitir que o usuário alterasse o status para qualquer outro, sem restrições.
-- Havia planejado de utilizar o FluentValidation com Blazilla para a aplicação, porém utilizei DataAnnotations nos formulário de cadastro e edição junto a uma model interna da .razor, eu evitaria fazer isso em um projeto real, mas para economizar tempo de uma coisa bonûs optei por utilizar um pouco de GoHorse
+**Motivo:**  
+O WebAssembly apresenta maior tempo de primeira inicialização (download do runtime) e é mais adequado para aplicações que precisam funcionar offline por períodos curtos ou médios. Como o portal da GoodHamburger é uma aplicação interna com acesso contínuo à internet.
 
+---
 
+### Biblioteca de componentes
 
-Como já havia rascunhado e estruturado mais ou menos o que precisaria para o portal, utilizei vários agentes de IA
-	- Anthropic Claude Code: 
-		- Haiku 4.5 para tarefas mais simples, como gerar os scaffolds da páginas.
-		- Opus 4.6 para identificar possíveis problema em runtime, foquei em arquivos especificos então é possível que existam outros problemas que não foram identificados.
-	- Anthropic Claude.Ai desktop, utilizei para tarefas que levariam mais tempo e poderiam ser executadas em segundo plano ou até em nuvem, mas foi bem pontual, acho utilizei poucas vezes para esse projeto.
-	- DeepSeek: Utilizei ele para melhoria de prompts e gerar instruções claras para o Haiku, além de ajustes mais bobos que comeriam muito token dos agente da Anthropic
-	-Obs.: Sempre utilizo a IA como ferramenta e assistente, é ótima para tarefas manuais como preparar um seed para banco de dados e scaffold, para o portal gostaria de ter colocado mais a mão na massa, mas ter um MVP tive que abrir mão um pouco da qualidade
+**Decisão:** MudBlazor.
 
-Sobre a interface, de fato não está bonita, funciona, mas nem em sonhos entregaria alguma assim para um cliente.
+**Motivo:**  
+- Gratuito e com boa documentação  
+- Experiência prévia da equipe  
+- Conjunto robusto de componentes (tabelas, formulários, modais, notificações) que atendia às necessidades do MVP
 
-Falando um pouco sobre a estrutura da solicitação de pedidos, utilizei EventCallBacks como prop nos componentes para a lógica de cadastro e removação ficar dentro do componente pai (Home.razor), os agentes geram uma quantidade de propriedades desnecessárias, mas seguiu os principios planejei, alguns callbacks poderia ser simplicados, mas não vejo como um problema só como um código não muito pensado pelo agente, fiz os ajustes necessário para nada quebrar e funcionar.
-Minha ideia era ser algo parecido com aqueles sites de hambueria pequena, cardápio e carrinho.
+---
+
+### MVP planejado x entregue
+
+**Planejado para o MVP:**
+- Autenticação e autorização consumindo a API
+- Página principal com painel de geração de pedidos
+- Cadastros auxiliares (cliente e produto) para dar realismo à aplicação
+- Listagem de pedidos com página de detalhamento
+- Alteração de status do pedido
+
+**Entregue / Observações:**
+- ✅ Autenticação integrada com a API
+- ✅ Página principal com geração de pedidos
+- ✅ Cadastros de cliente e produto
+  - ⚠️ *Obs.:* A estrutura de versionamento de valores existe na API, mas não houve tempo para implementar no cadastro de produto do portal.
+- ✅ Listagem e detalhamento de pedidos
+- ✅ Alteração de status de pedido
+  - ⚠️ *Obs.:* Nenhum workflow específico foi definido; optou-se por permitir alteração livre entre status, sem restrições de transição.
+
+---
+
+### Validação de formulários
+
+**Decisão inicial planejada:** FluentValidation com Blazilla.
+
+**Decisão real adotada:** DataAnnotations com model interna na `.razor`.
+
+**Motivo da mudança:**  
+Em um projeto real, utilizaria FluentValidation por oferecer maior flexibilidade e separação de concerns. No entanto, para ganhar tempo em uma funcionalidade bônus, optei por uma abordagem mais rápida ("GoHorse"), reconhecendo que não é o ideal, mas suficiente para o escopo do MVP.
+
+---
+
+### Uso de IA no desenvolvimento
+
+**Ferramentas utilizadas:**
+
+| Ferramenta | Uso |
+|------------|-----|
+| **Claude Code - Haiku 4.5** | Tarefas simples e repetitivas (ex: scaffolds de páginas) |
+| **Claude Code - Opus 4.6** | Identificação de problemas em runtime (focado em arquivos específicos - podem existir outros problemas não identificados) |
+| **Claude.ai desktop** | Tarefas demoradas executadas em segundo plano (uso pontual) |
+| **DeepSeek** | Melhoria de prompts, geração de instruções claras para o Haiku, ajustes menores que consumiriam muitos tokens da Anthropic |
+
+> **Observação importante:** A IA foi utilizada como ferramenta assistente, não como substituta do pensamento crítico. É excelente para tarefas manuais (ex: seed de banco de dados, scaffolds). Para o portal, gostaria de ter colocado mais "mão na massa", mas a necessidade de entregar um MVP me fez abrir mão parcialmente da qualidade ideal.
+
+---
+
+### Interface e experiência do usuário
+
+**Avaliação honesta:**  
+A interface não está bonita. Funciona, mas não seria entregue assim para um cliente real em circunstância alguma.
+
+---
+
+### Estrutura técnica da solicitação de pedidos
+
+**Decisão:** Utilizar `EventCallback` como parâmetro nos componentes, mantendo a lógica de cadastro e remoção no componente pai (`Home.razor`).
+
+**Observação crítica:**  
+Os agentes de IA geraram algumas propriedades desnecessárias. Apesar disso, a estrutura seguiu os princípios planejados. Alguns callbacks poderiam ser simplificados, mas isso não configura um problema grave – apenas um código não totalmente otimizado pelo agente.
+
+**Ajustes realizados:** Corrigi o necessário para garantir funcionamento sem quebras.
+
+**Inspiração original do design:**  
+A ideia era algo parecido com sites de hamburgueria pequena: cardápio + carrinho.
+
+---
+
+### Resumo dos Trade-offs assumidos (Portal)
+
+| Decisão | Trade-off assumido |
+|---------|--------------------|
+| Blazor Server | Perde capacidade offline, ganha velocidade no carregamento |
+| DataAnnotations (vs FluentValidation) | Menos flexibilidade, mais rapidez de implementação |
+| IA intensiva nos scaffolds | Velocidade de entrega x qualidade do código gerado |
+| Interface simples | Funcional x esteticamente agradável |
+
+---
+
+## Considerações finais
+
+Este projeto representa um **MVP funcional** com consciência clara dos trade-offs realizados. As decisões documentadas aqui não refletem necessariamente o que seria feito em um ambiente de produção com mais tempo, mas sim um equilíbrio entre qualidade, prazo e escopo.
+
+Áreas identificadas para melhoria futura:
+- Migração do SQLite para MySQL/SQL Server
+- Implementação de DTOs de resposta
+- Substituição de DataAnnotations por FluentValidation
+- Refinamento da interface visual
