@@ -1,0 +1,156 @@
+﻿@page "/customers"
+@attribute [Authorize(Roles = "Administrador, Funcionário")]
+
+@using GoodHamburger.Portal.Services.Customers
+@using GoodHamburger.Shared.Models.Customers
+
+@inject CustomerService CustomerService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<PageTitle>Clientes - Good Hamburger</PageTitle>
+
+<MudContainer>
+    <MudText Typo="Typo.h4" Class="mb-4">Clientes</MudText>
+    
+    <MudGrid Class="mb-4">
+        <MudItem xs="12" sm="8">
+            <MudTextField @bind-Value="_searchTerm"
+                          Label="Buscar por nome ou telefone"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          OnKeyUp="HandleSearchKeyUp"
+                          Immediate="true" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <AuthorizeView Roles="Administrador">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="NavigateToCreate"
+                           FullWidth="true">
+                    Novo Cliente
+                </MudButton>
+            </AuthorizeView>
+        </MudItem>
+    </MudGrid>
+
+    @if (_isLoading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Class="mt-4" />
+    }
+    else if (_customers is null || !_customers.Any())
+    {
+        <MudAlert Severity="Severity.Info" Class="mt-4">
+            Nenhum cliente encontrado.
+        </MudAlert>
+    }
+    else
+    {
+        <MudTable Items="@_customers" Hover="true" Striped="true" Class="mt-4">
+            <HeaderContent>
+                <MudTh>Nome</MudTh>
+                <MudTh>Telefone</MudTh>
+                <MudTh>Endereço</MudTh>
+                <MudTh>Ações</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Nome">@context.Name</MudTd>
+                <MudTd DataLabel="Telefone">@context.Phone</MudTd>
+                <MudTd DataLabel="Endereço">@context.Address</MudTd>
+                <MudTd DataLabel="Ações">
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                                   Color="Color.Info"
+                                   OnClick="@(() => NavigateToView(context.Id))"
+                                   Title="Visualizar" />
+                    <AuthorizeView Roles="Administrador" Context="authContext">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Warning"
+                                       OnClick="@(() => NavigateToEdit(context.Id))"
+                                       Title="Editar" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       OnClick="@(() => ConfirmDelete(context))"
+                                       Title="Excluir" />
+                    </AuthorizeView>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+</MudContainer>
+
+@code {
+    private List<Customer>? _customers;
+    private string _searchTerm = string.Empty;
+    private bool _isLoading = true;
+    private bool _hasLoaded = false; // 👈 Controle de carregamento
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_hasLoaded)
+        {
+            _hasLoaded = true;
+            await LoadCustomers();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadCustomers()
+    {
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+            
+            _customers = string.IsNullOrWhiteSpace(_searchTerm)
+                ? await CustomerService.GetAllAsync()
+                : await CustomerService.FindAsync(name: _searchTerm);
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Erro ao carregar clientes: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleSearchKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await LoadCustomers();
+        }
+    }
+
+    private void NavigateToCreate() => Navigation.NavigateTo("/customers/create");
+    private void NavigateToEdit(Guid id) => Navigation.NavigateTo($"/customers/edit/{id}");
+    private void NavigateToView(Guid id) => Navigation.NavigateTo($"/customers/view/{id}");
+
+    private async Task ConfirmDelete(Customer customer)
+    {
+        var parameters = new DialogParameters { ["ContentText"] = $"Deseja realmente excluir o cliente {customer.Name}?" };
+        var dialog = await DialogService.ShowMessageBoxAsync("Excluir Cliente",
+            (string)parameters["ContentText"],
+            yesText: "Excluir",
+            cancelText: "Cancelar");
+
+        if (dialog == true)
+        {
+            try
+            {
+                await CustomerService.DeleteAsync(customer.Id);
+                Snackbar.Add("Cliente excluído com sucesso!", Severity.Success);
+                await LoadCustomers();
+            }
+            catch (HttpRequestException ex)
+            {
+                Snackbar.Add($"Erro ao excluir cliente: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+}

@@ -1,5 +1,4 @@
-﻿// Services/ApiHttpClient.cs
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using System.Net.Http.Headers;
 using GoodHamburger.Shared.DTOs.Auth;
 

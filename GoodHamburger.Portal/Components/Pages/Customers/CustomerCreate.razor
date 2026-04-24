@@ -1,0 +1,114 @@
+﻿@page "/customers/create"
+@attribute [Authorize(Roles = "Administrador")]
+
+@using GoodHamburger.Portal.Services.Customers
+@using GoodHamburger.Shared.DTOs.Customers
+@using System.ComponentModel.DataAnnotations
+
+@inject CustomerService CustomerService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<PageTitle>Novo Cliente - Good Hamburger</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudText Typo="Typo.h4" Class="mb-4">Novo Cliente</MudText>
+
+    <MudCard>
+        <MudCardContent>
+            <EditForm Model="@_model" OnValidSubmit="CreateAsync">
+                <DataAnnotationsValidator />
+                
+                <MudGrid>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_model.Name"
+                                      Label="Nome"
+                                      Required="true"
+                                      RequiredError="O nome é obrigatório"
+                                      For="@(() => _model.Name)" />
+                        <ValidationMessage For="@(() => _model.Name)" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_model.Phone"
+                                      Label="Telefone"
+                                      Required="true"
+                                      RequiredError="O telefone é obrigatório"
+                                      Mask="@(new PatternMask("(00) 00000-0000"))"
+                                      For="@(() => _model.Phone)" />
+                        <ValidationMessage For="@(() => _model.Phone)" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_model.Address"
+                                      Label="Endereço"
+                                      Required="true"
+                                      RequiredError="O endereço é obrigatório"
+                                      For="@(() => _model.Address)" />
+                        <ValidationMessage For="@(() => _model.Address)" />
+                    </MudItem>
+                </MudGrid>
+
+                <MudGrid Class="mt-4">
+                    <MudItem xs="6">
+                        <MudButton Variant="Variant.Outlined"
+                                   StartIcon="@Icons.Material.Filled.ArrowBack"
+                                   OnClick="GoBack"
+                                   FullWidth="true">
+                            Voltar
+                        </MudButton>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.Save"
+                                   ButtonType="ButtonType.Submit"
+                                   Disabled="@_isSaving"
+                                   FullWidth="true">
+                            @(_isSaving ? "Salvando..." : "Salvar")
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+            </EditForm>
+        </MudCardContent>
+    </MudCard>
+</MudContainer>
+
+@code {
+    private CustomerCreateModel _model = new();
+    private bool _isSaving;
+
+    private class CustomerCreateModel
+    {
+        [Required(ErrorMessage = "O nome é obrigatório")]
+        [StringLength(100, ErrorMessage = "Nome deve ter no máximo 100 caracteres")]
+        public string Name { get; set; } = "";
+
+        [Required(ErrorMessage = "O telefone é obrigatório")]
+        [Phone(ErrorMessage = "Telefone inválido")]
+        public string Phone { get; set; } = "";
+
+        [Required(ErrorMessage = "O endereço é obrigatório")]
+        public string Address { get; set; } = "";
+    }
+
+    private void GoBack() => Navigation.NavigateTo("/customers");
+
+    private async Task CreateAsync()
+    {
+        try
+        {
+            _isSaving = true;
+            var dto = new CreateCustomerDto(_model.Name, _model.Phone, _model.Address);
+            await CustomerService.CreateAsync(dto);
+            Snackbar.Add("Cliente cadastrado com sucesso!", Severity.Success);
+            Navigation.NavigateTo("/customers");
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Erro ao cadastrar cliente: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+}

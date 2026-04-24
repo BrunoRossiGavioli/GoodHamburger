@@ -1,0 +1,86 @@
+﻿@page "/customers/view/{Id:guid}"
+@attribute [Authorize(Roles = "Administrador,Funcionario")]
+
+@using GoodHamburger.Portal.Services.Customers
+@using GoodHamburger.Shared.Models.Customers
+
+@inject CustomerService CustomerService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<PageTitle>Visualizar Cliente - Good Hamburger</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    @if (_isLoading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Class="mt-4" />
+    }
+    else if (_customer is null)
+    {
+        <MudAlert Severity="Severity.Error">Cliente não encontrado.</MudAlert>
+    }
+    else
+    {
+        <MudText Typo="Typo.h4" Class="mb-4">@_customer.Name</MudText>
+
+        <MudCard>
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Nome</MudText>
+                        <MudText Typo="Typo.body1">@_customer.Name</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Telefone</MudText>
+                        <MudText Typo="Typo.body1">@_customer.Phone</MudText>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Endereço</MudText>
+                        <MudText Typo="Typo.body1">@_customer.Address</MudText>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Outlined"
+                           StartIcon="@Icons.Material.Filled.ArrowBack"
+                           OnClick="GoBack">
+                    Voltar
+                </MudButton>
+                <AuthorizeView Roles="Administrador">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Edit"
+                               OnClick="NavigateToEdit">
+                        Editar
+                    </MudButton>
+                </AuthorizeView>
+            </MudCardActions>
+        </MudCard>
+    }
+</MudContainer>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private Customer? _customer;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _customer = await CustomerService.GetByIdAsync(Id);
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Erro ao carregar cliente: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void GoBack() => Navigation.NavigateTo("/customers");
+    private void NavigateToEdit() => Navigation.NavigateTo($"/customers/edit/{Id}");
+}

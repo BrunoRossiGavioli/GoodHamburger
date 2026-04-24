@@ -1,0 +1,140 @@
+﻿@page "/customers/edit/{Id:guid}"
+@attribute [Authorize(Roles = "Administrador")]
+
+@using GoodHamburger.Portal.Services.Customers
+@using GoodHamburger.Shared.DTOs.Customers
+@using GoodHamburger.Shared.Models.Customers
+@using System.ComponentModel.DataAnnotations
+
+@inject CustomerService CustomerService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<PageTitle>Editar Cliente - Good Hamburger</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudText Typo="Typo.h4" Class="mb-4">Editar Cliente</MudText>
+
+    @if (_isLoading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Class="mt-4" />
+    }
+    else if (_customer is null)
+    {
+        <MudAlert Severity="Severity.Error">Cliente não encontrado.</MudAlert>
+    }
+    else
+    {
+        <MudCard>
+            <MudCardContent>
+                <EditForm Model="@_model" OnValidSubmit="UpdateAsync">
+                    <DataAnnotationsValidator />
+                    
+                    <MudGrid>
+                        <MudItem xs="12">
+                            <MudTextField @bind-Value="_model.Name"
+                                          Label="Nome"
+                                          Required="true"
+                                          For="@(() => _model.Name)" />
+                            <ValidationMessage For="@(() => _model.Name)" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField @bind-Value="_model.Phone"
+                                          Label="Telefone"
+                                          Required="true"
+                                          Mask="@(new PatternMask("(00) 00000-0000"))"
+                                          For="@(() => _model.Phone)" />
+                            <ValidationMessage For="@(() => _model.Phone)" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField @bind-Value="_model.Address"
+                                          Label="Endereço"
+                                          Required="true"
+                                          For="@(() => _model.Address)" />
+                            <ValidationMessage For="@(() => _model.Address)" />
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudGrid Class="mt-4">
+                        <MudItem xs="6">
+                            <MudButton Variant="Variant.Outlined"
+                                       StartIcon="@Icons.Material.Filled.ArrowBack"
+                                       OnClick="GoBack"
+                                       FullWidth="true">
+                                Voltar
+                            </MudButton>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Save"
+                                       ButtonType="ButtonType.Submit"
+                                       FullWidth="true">
+                                Atualizar
+                            </MudButton>
+                        </MudItem>
+                    </MudGrid>
+                </EditForm>
+            </MudCardContent>
+        </MudCard>
+    }
+</MudContainer>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private CustomerEditModel _model = new();
+    private Customer? _customer;
+    private bool _isLoading = true;
+
+    private class CustomerEditModel
+    {
+        [Required(ErrorMessage = "O nome é obrigatório")]
+        public string Name { get; set; } = "";
+
+        [Required(ErrorMessage = "O telefone é obrigatório")]
+        public string Phone { get; set; } = "";
+
+        [Required(ErrorMessage = "O endereço é obrigatório")]
+        public string Address { get; set; } = "";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _customer = await CustomerService.GetByIdAsync(Id);
+            _model = new CustomerEditModel
+            {
+                Name = _customer.Name,
+                Phone = _customer.Phone,
+                Address = _customer.Address
+            };
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Erro ao carregar cliente: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void GoBack() => Navigation.NavigateTo("/customers");
+
+    private async Task UpdateAsync()
+    {
+        try
+        {
+            var dto = new UpdateCustomerDto(Id, _model.Name, _model.Phone, _model.Address);
+            await CustomerService.UpdateAsync(dto);
+            Snackbar.Add("Cliente atualizado com sucesso!", Severity.Success);
+            Navigation.NavigateTo("/customers");
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Erro ao atualizar cliente: {ex.Message}", Severity.Error);
+        }
+    }
+}
