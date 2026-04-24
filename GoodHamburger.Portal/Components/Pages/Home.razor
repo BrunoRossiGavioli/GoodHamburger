@@ -1,5 +1,5 @@
 ﻿@page "/"
-@attribute [Authorize]
+@attribute [Authorize(Roles = $"{Roles.Administrador},{Roles.Funcionario}")]
 
 @using GoodHamburger.Portal.Components.Pages.Orders
 @using GoodHamburger.Portal.Components.Pages.Products

@@ -1,5 +1,5 @@
 ﻿@page "/products/edit/{Id:guid}"
-@attribute [Authorize(Roles = "Administrador")]
+@attribute [Authorize(Roles = Roles.Administrador)]
 
 @using GoodHamburger.Portal.Services.Products
 @using GoodHamburger.Shared.DTOs.Products

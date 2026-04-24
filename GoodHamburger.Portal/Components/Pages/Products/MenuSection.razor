@@ -6,7 +6,7 @@
 <div class="menu-section">
     @foreach (var group in ProductGroups ?? Enumerable.Empty<IGrouping<ProductType, Product>>())
     {
-        <MudText Typo="Typo.h5" Class="mb-2 mt-4">@group.Key.GetDisplayName()</MudText>
+        <MudText Typo="Typo.h5" Class="mb-2 mt-4">@GetProductTypeDisplayName(group.Key)</MudText>
         <MudGrid Spacing="2">
             @foreach (var product in group)
             {
@@ -42,4 +42,19 @@
     [Parameter] public IEnumerable<IGrouping<ProductType, Product>>? ProductGroups { get; set; }
     [Parameter] public EventCallback<Product> OnAddProduct { get; set; }
     [Parameter] public List<OrderItem>? Items { get; set; }
+
+    string GetProductTypeDisplayName(ProductType type)
+    {
+        switch (type)
+        {
+            case ProductType.Sandwich:
+                return "Lanches";
+            case ProductType.Fries:
+                return "Batatas";
+            case ProductType.Drink:
+                return "Bebidas";
+            default:
+                return type.GetDisplayName();
+        }
+    }
 }

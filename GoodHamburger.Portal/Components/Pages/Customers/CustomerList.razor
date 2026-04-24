@@ -1,6 +1,5 @@
 ﻿@page "/customers"
-@attribute [Authorize(Roles = "Administrador, Funcionário")]
-
+@attribute [Authorize(Roles = $"{Roles.Administrador},{Roles.Funcionario}")]
 @using GoodHamburger.Portal.Services.Customers
 @using GoodHamburger.Shared.Models.Customers
 

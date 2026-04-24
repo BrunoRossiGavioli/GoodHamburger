@@ -1,5 +1,5 @@
 ﻿@page "/products/view/{Id:guid}"
-@attribute [Authorize(Roles = "Administrador,Funcionario")]
+@attribute [Authorize(Roles = $"{Roles.Administrador},{Roles.Funcionario}")]
 
 @using GoodHamburger.Portal.Services.Products
 @using GoodHamburger.Shared.Extensions
